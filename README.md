@@ -33,7 +33,7 @@ $ pip install --editable .
 Tutorials
 ---------
 
-Torch3d includes some simple examples to get you started.
+Torch3d includes some tutorials to get you started.
 These tutorials assume that you have a basic understanding of PyTorch.
 - [Point cloud classification (ModelNet40) using PointNet](examples/modelnet40) (Beginner)
 
@@ -54,3 +54,8 @@ Modules
   + PointCNN from Li et al. (NeurIPS 2018) [[Paper](https://arxiv.org/abs/1801.07791)]
 - **nn**: Low-level operations that can be used to build up complex 3D neural networks.
 - **transforms**: Common transformations for dataset preprocessing.
+
+
+Contributions
+-------------
+All contributions and/or suggestions are welcomed.
