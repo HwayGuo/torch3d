@@ -1,12 +1,12 @@
-Torch3d
+torch3d
 =======
 [![PyPI](https://img.shields.io/pypi/v/torch3d)](https://pypi.org/project/torch3d)
 [![Downloads](https://pepy.tech/badge/torch3d)](https://pepy.tech/project/torch3d)
 
-Torch3d is a PyTorch library consisting of datasets, model architectures, and common operations for 3D deep learning.
+**torch3d** is a PyTorch library consisting of datasets, model architectures, and common operations for 3D deep learning.
 For 3D domain, there is currently no official support from PyTorch that likes [torchvision](https://github.com/pytorch/vision) for images.
-Torch3d aims to fill this gap by streamlining the prototyping process of deep learning on 3D domain.
-Currently, Torch3d focuses on deep learning methods on 3D point clouds.
+Hence, torch3d aims to fill this gap by streamlining the prototyping process of deep learning on 3D domain.
+Currently, torch3d focuses on deep learning methods on 3D point sets.
 
 
 Installation
@@ -33,9 +33,11 @@ $ pip install --editable .
 Tutorials
 ---------
 
-Torch3d includes some tutorials to get you started.
+Here are some tutorials to get you started.
 These tutorials assume that you have a basic understanding of PyTorch.
 - [Point cloud classification (ModelNet40) using PointNet](examples/modelnet40) (Beginner)
+
+> Take a look at [sota3d](https://github.com/pqhieu/sota3d) to see how torch3d is being used in practice.
 
 
 Modules
