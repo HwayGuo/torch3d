@@ -28,7 +28,7 @@ def main(args):
         "test": data.DataLoader(
             datasets.ModelNet40(
                 args.root,
-                train=False,
+                train=False,  # now we use the test set
                 transform=transform,
                 download=False,
             ),
