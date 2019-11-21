@@ -18,12 +18,12 @@ Modules
 - **metrics**: Implement different metrics for on-the-fly training evaluation of different tasks.
   + Binary accuracy, accuracy
   + Jaccard (Intersection-over-Union)
-- **models**: Re-implement state-of-the-art models based on
+- **models**: Re-implement state-of-the-art models based on their original descriptions. The following models are supported:
   + PointNet from Qi et al. (CVPR 2017) [[Paper](https://arxiv.org/abs/1612.00593)]
   + PoinNet++ from Qi et al. (NeurIPS 2017) [[Paper](https://arxiv.org/abs/1706.02413)]
   + PointCNN from Li et al. (NeurIPS 2018) [[Paper](https://arxiv.org/abs/1801.07791)]
-- **nn**: Low-level operations that can be used to build up complex 3D neural networks
-- **transforms**: Common transformations for dataset preprocessing
+- **nn**: Low-level operations that can be used to build up complex 3D neural networks.
+- **transforms**: Common transformations for dataset preprocessing.
 
 Installation
 ------------
@@ -33,20 +33,14 @@ Required PyTorch 1.2 or newer. Some other dependencies are:
 
 From PyPi:
 ```bash
-pip install torch3d
+$ pip install torch3d
 ```
 
 From source:
 ```bash
-git clone https://github.com/pqhieu/torch3d
-cd torch3d
-pip install --editable .
+$ git clone https://github.com/pqhieu/torch3d
+$ cd torch3d
+$ pip install --editable .
 ```
 
 **Note**: Some of the operations require CUDA.
-
-License
--------
-BSD 3-Clause License
-
-If you use any of the models or datasets, please cite the orginal papers.
