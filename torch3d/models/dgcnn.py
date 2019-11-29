@@ -21,11 +21,11 @@ class DGCNN(nn.Module):
         self.mlp = nn.Sequential(
             nn.Linear(1024, 512, bias=False),
             nn.BatchNorm1d(512),
-            nn.LeakyReLU(0.2, True),
+            nn.ReLU(True),
             nn.Dropout(self.dropout),
             nn.Linear(512, 256, bias=False),
             nn.BatchNorm1d(256),
-            nn.LeakyReLU(0.2, True),
+            nn.ReLU(True),
             nn.Dropout(self.dropout),
         )
         self.fc = nn.Linear(256, self.num_classes)

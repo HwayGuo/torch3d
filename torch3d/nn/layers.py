@@ -22,7 +22,7 @@ class EdgeConv(nn.Module):
         for channels in self.channels:
             modules.append(nn.Conv2d(last_channels, channels, 1, bias=self.bias))
             modules.append(nn.BatchNorm2d(channels))
-            modules.append(nn.LeakyReLU(0.2, inplace=True))
+            modules.append(nn.ReLU(True))
             last_channels = channels
         self.conv = nn.Sequential(*modules)
 
