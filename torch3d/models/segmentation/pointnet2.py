@@ -38,13 +38,13 @@ class PointNetSSG(nn.Module):
         self.fc = nn.Conv1d(128, self.num_classes, 1)
 
     def forward(self, p, x=None):
-        q1, _ = self.down1(p)
+        q1, x1 = self.down1(p)
         p1, x1 = self.sa1(p, q1, x)
-        q2, _ = self.down2(p1)
+        q2, x2 = self.down2(p1)
         p2, x2 = self.sa2(p1, q2, x1)
-        q3, _ = self.down3(p2)
+        q3, x3 = self.down3(p2)
         p3, x3 = self.sa3(p2, q3, x2)
-        q4, _ = self.down4(p3)
+        q4, x4 = self.down4(p3)
         p4, x4 = self.sa4(p3, q4, x3)
         p3, x3 = self.fp1(p4, q3, x4, x3)
         p2, x2 = self.fp2(p3, q2, x3, x2)

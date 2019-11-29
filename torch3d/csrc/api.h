@@ -20,14 +20,3 @@ at::Tensor point_interpolate_grad(
     const at::Tensor& index,
     const at::Tensor& weight,
     int n);
-
-std::vector<at::Tensor> chamfer_distance(
-    const at::Tensor& input,
-    const at::Tensor& target);
-std::vector<at::Tensor> chamfer_distance_grad(
-    const at::Tensor& grad1,
-    const at::Tensor& grad2,
-    const at::Tensor& input,
-    const at::Tensor& target,
-    const at::Tensor& index1,
-    const at::Tensor& index2);
