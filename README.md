@@ -54,6 +54,7 @@ Modules
   + PointNet from Qi et al. (CVPR 2017) [[Paper](https://arxiv.org/abs/1612.00593)]
   + PoinNet++ from Qi et al. (NeurIPS 2017) [[Paper](https://arxiv.org/abs/1706.02413)]
   + PointCNN from Li et al. (NeurIPS 2018) [[Paper](https://arxiv.org/abs/1801.07791)]
+  + DGCNN from Wang et al. (ToG 2019) [[Paper](https://arxiv.org/abs/1801.07829)]
 - **nn**: Low-level operations that can be used to build up complex 3D neural networks.
 - **transforms**: Common transformations for dataset preprocessing.
 
