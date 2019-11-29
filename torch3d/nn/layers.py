@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from collections.abc import Iterable
 from torch3d.nn import functional as F
 
 
@@ -7,17 +8,23 @@ __all__ = ["EdgeConv", "XConv", "SetAbstraction", "FeaturePropagation"]
 
 
 class EdgeConv(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, bias=True):
+    def __init__(self, in_channels, channels, kernel_size, bias=True):
         super(EdgeConv, self).__init__()
         self.in_channels = in_channels
-        self.out_channels = out_channels
+        if not isinstance(channels, Iterable):
+            self.channels = (channels,)
+        else:
+            self.channels = channels
         self.kernel_size = kernel_size
         self.bias = bias
-        self.conv = nn.Sequential(
-            nn.Conv2d(self.in_channels * 2, self.out_channels, 1, bias=self.bias),
-            nn.BatchNorm2d(self.out_channels),
-            nn.LeakyReLU(0.2, inplace=True),
-        )
+        last_channels = in_channels * 2
+        modules = []
+        for channels in self.channels:
+            modules.append(nn.Conv2d(last_channels, channels, 1, bias=self.bias))
+            modules.append(nn.BatchNorm2d(channels))
+            modules.append(nn.LeakyReLU(0.2, inplace=True))
+            last_channels = channels
+        self.conv = nn.Sequential(*modules)
 
     def forward(self, x):
         batch_size = x.shape[0]
