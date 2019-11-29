@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import torch3d.nn.functional as F
+from torch3d.nn import functional as F
 
 
 __all__ = [
