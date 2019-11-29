@@ -7,10 +7,11 @@ __all__ = ["PointCNN"]
 
 
 class PointCNN(nn.Module):
-    def __init__(self, in_channels, num_classes):
+    def __init__(self, in_channels, num_classes, dropout=0.5):
         super(PointCNN, self).__init__()
         self.in_channels = in_channels
         self.num_classes = num_classes
+        self.dropout = dropout
         self.down1 = RandomPointSample(1024)
         self.down2 = RandomPointSample(384)
         self.down3 = RandomPointSample(128)
@@ -23,11 +24,11 @@ class PointCNN(nn.Module):
             nn.Conv1d(384, 256, 1, bias=False),
             nn.BatchNorm1d(256),
             nn.ReLU(True),
-            nn.Dropout(0.2),
+            nn.Dropout(self.dropout),
             nn.Conv1d(256, 128, 1, bias=False),
             nn.BatchNorm1d(128),
             nn.ReLU(True),
-            nn.Dropout(0.2),
+            nn.Dropout(self.dropout),
         )
         self.fc = nn.Conv1d(128, self.num_classes, 1)
         self.avgpool = nn.AdaptiveAvgPool1d(1)

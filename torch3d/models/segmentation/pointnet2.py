@@ -7,10 +7,11 @@ __all__ = ["PointNetSSG"]
 
 
 class PointNetSSG(nn.Module):
-    def __init__(self, in_channels, num_classes):
+    def __init__(self, in_channels, num_classes, dropout=0.5):
         super(PointNetSSG, self).__init__()
         self.in_channels = in_channels
         self.num_classes = num_classes
+        self.dropout = dropout
         self.down1 = FarthestPointSample(1024)
         self.down2 = FarthestPointSample(256)
         self.down3 = FarthestPointSample(64)
@@ -29,11 +30,11 @@ class PointNetSSG(nn.Module):
             nn.Conv1d(128, 128, 1, bias=False),
             nn.BatchNorm1d(128),
             nn.ReLU(True),
-            nn.Dropout(0.5),
+            nn.Dropout(self.dropout),
             nn.Conv1d(128, 128, 1, bias=False),
             nn.BatchNorm1d(128),
             nn.ReLU(True),
-            nn.Dropout(0.5),
+            nn.Dropout(self.dropout),
         )
         self.fc = nn.Conv1d(128, self.num_classes, 1)
 

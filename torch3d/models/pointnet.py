@@ -6,10 +6,11 @@ __all__ = ["PointNet"]
 
 
 class PointNet(nn.Module):
-    def __init__(self, in_channels, num_classes):
+    def __init__(self, in_channels, num_classes, dropout=0.5):
         super(PointNet, self).__init__()
         self.in_channels = in_channels
         self.num_classes = num_classes
+        self.dropout = dropout
         self.mlp1 = nn.Sequential(
             nn.Conv1d(self.in_channels, 64, 1, bias=False),
             nn.BatchNorm1d(64),
@@ -31,11 +32,11 @@ class PointNet(nn.Module):
             nn.Linear(1024, 512, bias=False),
             nn.BatchNorm1d(512),
             nn.ReLU(True),
-            nn.Dropout(0.2),
+            nn.Dropout(self.dropout),
             nn.Linear(512, 256, bias=False),
             nn.BatchNorm1d(256),
             nn.ReLU(True),
-            nn.Dropout(0.2),
+            nn.Dropout(self.dropout),
         )
         self.fc = nn.Linear(256, self.num_classes)
 
