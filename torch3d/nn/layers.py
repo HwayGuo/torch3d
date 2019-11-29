@@ -3,7 +3,36 @@ import torch.nn as nn
 from torch3d.nn import functional as F
 
 
-__all__ = ["XConv", "SetAbstraction", "FeaturePropagation"]
+__all__ = ["EdgeConv", "XConv", "SetAbstraction", "FeaturePropagation"]
+
+
+class EdgeConv(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, bias=True):
+        super(EdgeConv, self).__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.kernel_size = kernel_size
+        self.bias = bias
+        self.conv = nn.Sequential(
+            nn.Conv2d(self.in_channels * 2, self.out_channels, 1, bias=self.bias),
+            nn.BatchNorm2d(self.out_channels),
+            nn.LeakyReLU(0.2, inplace=True),
+        )
+
+    def forward(self, x):
+        batch_size = x.shape[0]
+        x = x.permute(0, 2, 1)
+        _, index = F.knn(x, x, self.kernel_size)
+        views = list(index.shape) + [-1]
+        x_hat = F.batched_index_select(x, 1, index.view(batch_size, -1))
+        x_hat = x_hat.view(views)
+        x = x.unsqueeze(2).repeat(1, 1, self.kernel_size, 1)
+        x_hat = x_hat - x
+        x = torch.cat([x, x_hat], dim=-1)
+        x = x.permute(0, 3, 1, 2)
+        x = self.conv(x)
+        x = torch.max(x, dim=-1, keepdim=False)[0]
+        return x
 
 
 class XConv(nn.Module):
