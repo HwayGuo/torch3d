@@ -16,9 +16,7 @@ class DGCNN(nn.Module):
         self.conv2 = EdgeConv(64, [64, 64], 20, bias=False)
         self.conv3 = EdgeConv(64, 64, 20, bias=False)
         self.conv4 = nn.Sequential(
-            nn.Conv1d(192, 1024, 1, bias=False),
-            nn.BatchNorm1d(1024),
-            nn.ReLU(True),
+            nn.Conv1d(192, 1024, 1, bias=False), nn.BatchNorm1d(1024), nn.ReLU(True),
         )
         self.maxpool = nn.AdaptiveMaxPool1d(1)
         self.mlp = nn.Sequential(
