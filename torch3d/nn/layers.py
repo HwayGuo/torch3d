@@ -135,12 +135,12 @@ class SetAbstraction(nn.Module):
         else:
             x_hat = p.unsqueeze(1)
         if x is not None:
-            if self.radius is not None:
-                x = x.permute(0, 2, 1)
-                x = F.batched_index_select(x, 1, index.view(batch_size, -1))
-                x = x.view(views)
-            else:
-                x = x.unsqueeze(1)
+            x = x.permute(0, 2, 1)
+            x = (
+                F.batched_index_select(x, 1, index.view(batch_size, -1)).view(views)
+                if self.radius
+                else x.unsqueeze(1)
+            )
             x_hat = torch.cat([x_hat, x], dim=-1)
         x = x_hat.permute(0, 3, 1, 2)
         x = self.mlp(x)
