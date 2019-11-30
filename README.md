@@ -57,8 +57,3 @@ Modules
   + DGCNN from Wang et al. (ToG 2019) [[Paper](https://arxiv.org/abs/1801.07829)]
 - **nn**: Low-level operations that can be used to build up complex 3D neural networks.
 - **transforms**: Common transformations for dataset preprocessing.
-
-
-Contributions
--------------
-All contributions and/or suggestions are welcomed.
