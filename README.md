@@ -1,13 +1,15 @@
 Torch3d
 =======
+[![Build Status](https://travis-ci.com/pqhieu/torch3d.svg?branch=master)](https://travis-ci.com/pqhieu/torch3d)
 [![PyPI](https://img.shields.io/pypi/v/torch3d)](https://pypi.org/project/torch3d)
 [![Downloads](https://pepy.tech/badge/torch3d)](https://pepy.tech/project/torch3d)
 
-**Torch3d** is a PyTorch library consisting of datasets, model architectures, and common operations for 3D deep learning.
-For 3D domain, there is currently no official support from PyTorch that likes [torchvision](https://github.com/pytorch/vision) for images.
-Hence, Torch3d aims to fill this gap by streamlining the prototyping process of deep learning on 3D domain.
-Currently, Torch3d focuses on deep learning methods on 3D point sets.
-
+Torch3d is a PyTorch library consisting of datasets, model architectures, and
+common operations for 3D deep learning. For 3D domain, there is currently no
+official support from PyTorch that likes [torchvision](https://github.com/pytorch/vision)
+for images. Torch3d aims to fill this gap by streamlining the prototyping
+process of deep learning on 3D domain. Currently, Torch3d focuses on deep
+learning methods on 3D point sets.
 
 Installation
 ------------
