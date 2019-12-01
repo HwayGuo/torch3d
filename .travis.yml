@@ -7,6 +7,10 @@ install:
   - pip install torch
   - pip install torchvision
   - pip install h5py
+  - pip install pytest pytest-cov codecov
   - pip install .
 script:
-  - pytest -k 'not TestPointNet2'
+  - pytest --cov torch3d -k 'not TestPointNet2'
+after_success:
+  - coverage report
+  - codecov

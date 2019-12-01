@@ -1,0 +1,9 @@
+[run]
+branch = True
+source = torch3d
+
+[report]
+exclude_lines =
+    pragma: no cover
+    raise
+    except
