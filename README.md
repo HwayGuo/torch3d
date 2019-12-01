@@ -29,7 +29,7 @@ $ cd torch3d
 $ pip install --editable .
 ```
 
-> **Note**: Some of the operations require CUDA.
+> **NOTE**: Some operators require CUDA.
 
 
 Tutorials

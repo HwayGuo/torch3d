@@ -10,7 +10,6 @@ install:
   - pip install pytest pytest-cov codecov
   - pip install .
 script:
-  - pytest --cov-report=xml --cov=torch3d -k 'not TestPointNet2' tests/
+  - pytest --cov=torch3d -k 'not TestPointNet2' tests/
 after_success:
-  - coverage report
   - codecov
