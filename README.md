@@ -1,9 +1,10 @@
 Torch3d
 =======
-[![Build Status](https://travis-ci.com/pqhieu/torch3d.svg?branch=master)](https://travis-ci.com/pqhieu/torch3d)
-[![codecov](https://codecov.io/gh/pqhieu/torch3d/branch/master/graph/badge.svg)](https://codecov.io/gh/pqhieu/torch3d)
+[![Build Status](https://img.shields.io/travis/pqhieu/torch3d)](https://travis-ci.com/pqhieu/torch3d)
+[![codecov](https://img.shields.io/codecov/c/github/pqhieu/torch3d)](https://codecov.io/gh/pqhieu/torch3d)
 [![PyPI](https://img.shields.io/pypi/v/torch3d)](https://pypi.org/project/torch3d)
 [![Downloads](https://pepy.tech/badge/torch3d)](https://pepy.tech/project/torch3d)
+[![License](https://img.shields.io/github/license/pqhieu/torch3d)](LICENSE)
 
 Torch3d is a PyTorch library consisting of datasets, model architectures, and
 common operations for 3D deep learning. For 3D domain, there is currently no
