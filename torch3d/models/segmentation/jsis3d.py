@@ -10,9 +10,9 @@ class JSIS3D(nn.Module):
         super(JSIS3D, self).__init__()
         self.num_classes = num_classes
         self.embedding_size = embedding_size
-        self.fan_in = backbone.fc.weight.data.shape[1]
+        self.fan = backbone.fc.weight.data.shape[1]
         self.net = backbone
-        self.net.fc = JSIS3DHead(self.fan_in, self.num_classes, self.embedding_size)
+        self.net.fc = JSIS3DHead(self.fan, self.num_classes, self.embedding_size)
 
     def forward(self, x):
         return self.net(x)

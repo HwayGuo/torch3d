@@ -17,6 +17,12 @@ class TestS3DIS:
         assert dataset._check_integrity()
 
 
+class TestSceneNN:
+    def test_download(self):
+        dataset = datasets.SceneNN(ROOT_DIR, train=False, download=True)
+        assert dataset._check_integrity()
+
+
 class TestShapeNetPart:
     def test_download(self):
         dataset = datasets.ShapeNetPart(ROOT_DIR, split="train", download=True)
