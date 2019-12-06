@@ -40,6 +40,7 @@ Getting started
 
 Here are some examples to get you started. These examples assume that you have a basic understanding of PyTorch.
 - [Point cloud classification (ModelNet40) using PointNet](examples/modelnet40) (Beginner)
+- [Semantic-instance segmentation (S3DIS) using JSIS3D](examples/s3dis) (Intermediate) [[Paper](https://arxiv.org/abs/1904.00699)]
 
 > Take a look at [SotA3d](https://github.com/pqhieu/sota3d) to see how Torch3d is being used in practice.
 

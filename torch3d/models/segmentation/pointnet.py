@@ -10,6 +10,7 @@ class PointNet(nn.Module):
         super(PointNet, self).__init__()
         self.in_channels = in_channels
         self.num_classes = num_classes
+        self.dropout = dropout
         self.mlp1 = nn.Sequential(
             nn.Conv1d(self.in_channels, 64, 1, bias=False),
             nn.BatchNorm1d(64),
