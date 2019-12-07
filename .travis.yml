@@ -10,6 +10,6 @@ install:
   - pip install pytest pytest-cov codecov
   - pip install .
 script:
-  - travis_wait 30 pytest --cov=torch3d -k 'not TestPointNet2' tests/
+  - pytest --cov=torch3d -k 'not TestPointNet2 and not download' tests/
 after_success:
   - codecov
