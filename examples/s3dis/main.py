@@ -7,6 +7,7 @@ import torch.utils.data as data
 import torch3d.transforms as transforms
 from torch3d.metrics import Accuracy, Jaccard
 from torch3d.models.segmentation import PointNet, JSIS3D
+from torch3d.nn.functional import discriminative_loss
 from dataset import S3DIS
 
 
@@ -51,13 +52,15 @@ def main(args):
     # Here comes the training loop
     for epoch in range(args.epochs):
         train_epoch(args, epoch, model, dataloaders["train"], optimizer, criteria)
-        evaluate(args, model, dataloaders["test"])
+        if (epoch + 1) % args.eval_freq == 0:
+            evaluate(args, model, dataloaders["test"])
     print("Done.")
 
 
 def loss_fn(output, target):
     loss = 0
     loss += F.cross_entropy(output[0], target[..., 0])
+    loss += discriminative_loss(output[1], target[..., 1])
     return loss
 
 
@@ -121,5 +124,6 @@ if __name__ == "__main__":
     parser.add_argument("--embedding_size", default=32, type=int)
     parser.add_argument("--test_area", default=5, type=int)
     parser.add_argument("--lr", default=0.001, type=float)
+    parser.add_argument("--eval_freq", default=10, type=int)
     args = parser.parse_args()
     main(args)
