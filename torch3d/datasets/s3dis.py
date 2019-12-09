@@ -88,7 +88,7 @@ class S3DIS(VisionDataset):
         self.data = np.concatenate(self.data, axis=0)
         self.targets = np.concatenate(self.targets, axis=0).squeeze()
 
-        # Filter point cloud not in area of interest
+        # Filter data that is not in the area of interest
         with open(os.path.join(self.root, self.name, "room_filelist.txt")) as fp:
             rooms = [x.strip() for x in fp]
         area = "Area_" + str(self.test_area)
