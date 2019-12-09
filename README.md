@@ -1,5 +1,5 @@
-Torch3d
-=======
+# Torch3d
+
 [![Build Status](https://img.shields.io/travis/pqhieu/torch3d)](https://travis-ci.com/pqhieu/torch3d)
 [![codecov](https://img.shields.io/codecov/c/github/pqhieu/torch3d)](https://codecov.io/gh/pqhieu/torch3d)
 [![PyPI](https://img.shields.io/pypi/v/torch3d)](https://pypi.org/project/torch3d)
@@ -14,8 +14,8 @@ process of deep learning on 3D domain. Currently, Torch3d focuses on deep
 learning methods on 3D point sets.
 
 
-Installation
-------------
+## Installation
+
 Required PyTorch 1.2 or newer. Some other dependencies are:
 - torchvision
 - h5py
@@ -35,8 +35,7 @@ $ pip install --editable .
 > **NOTE**: Some operators require CUDA.
 
 
-Getting started
----------------
+## Getting started
 
 Here are some examples to get you started. These examples assume that you have a basic understanding of PyTorch.
 - [Point cloud classification (ModelNet40) using PointNet](examples/modelnet40) (Beginner)
@@ -45,8 +44,8 @@ Here are some examples to get you started. These examples assume that you have a
 > Take a look at [SotA3d](https://github.com/pqhieu/sota3d) to see how Torch3d is being used in practice.
 
 
-Modules
--------
+## Modules
+
 Torch3d composes of the following modules:
 - **datasets**: Common 3D datasets for classification, semantic segmentation, and so on.
   + ModelNet40 [[URL](https://modelnet.cs.princeton.edu/)]

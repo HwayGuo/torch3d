@@ -1,9 +1,10 @@
-How to Run
-==========
+# PointNet classifier on ModelNet40
 
-```bash
-$ pip install -r requirements.txt
-$ python main.py
-```
+> **Difficulty**: Beginner
 
-For more details, you can use the `--help` option.
+Torch3d makes the prototyping process of 3D deep learning a breeze. Here is a
+quick tutorial of how to implement a point cloud classifier on the `ModelNet40`
+dataset.
+
+
+## Loading ModelNet40
