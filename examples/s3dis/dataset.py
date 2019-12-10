@@ -76,5 +76,8 @@ class S3DIS(VisionDataset):
             )
 
     def _check_integrity(self):
-        flist = list_files(os.path.join(self.root, self.name), ".h5")
+        path = os.path.join(self.root, self.name)
+        if not os.path.exists(path):
+            return False
+        flist = list_files(path, ".h5")
         return flist
