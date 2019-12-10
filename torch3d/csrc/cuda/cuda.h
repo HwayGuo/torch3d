@@ -1,7 +1,6 @@
 // -*- mode: c++ -*-
 #include <ATen/cuda/CUDAContext.h>
-#include <torch/extension.h>
-#include <vector>
+#include <torch/types.h>
 
 #if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 600
 #else
