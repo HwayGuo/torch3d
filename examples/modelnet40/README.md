@@ -1,4 +1,4 @@
-# PointNet classifier on ModelNet40
+# Point cloud classification on ModelNet40
 
 > **Difficulty**: Beginner
 

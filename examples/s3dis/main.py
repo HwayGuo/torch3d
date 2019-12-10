@@ -1,5 +1,6 @@
 import tqdm
 import argparse
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
@@ -45,15 +46,13 @@ def main(args):
     # Create PointNet model as the backbone
     backbone = PointNet(args.in_channels, args.num_classes)
     model = JSIS3D(backbone, args.num_classes, args.embedding_size).to(args.device)
-
     optimizer = optim.Adam(model.parameters(), args.lr)
     criteria = loss_fn
 
     # Here comes the training loop
     for epoch in range(args.epochs):
         train_epoch(args, epoch, model, dataloaders["train"], optimizer, criteria)
-        if (epoch + 1) % args.eval_freq == 0:
-            evaluate(args, model, dataloaders["test"])
+    evaluate(args, model, dataloaders["test"])
     print("Done.")
 
 
@@ -92,19 +91,20 @@ def evaluate(args, model, dataloader):
     metrics = [Accuracy(args.num_classes), Jaccard(args.num_classes)]
 
     model.eval()
-    for i, (input, target) in enumerate(dataloader):
-        input = input.to(args.device)
-        target = target.to(args.device)
-        output = model(input)
+    with torch.no_grad():
+        for i, (input, target) in enumerate(dataloader):
+            input = input.to(args.device)
+            target = target.to(args.device)
+            output = model(input)
 
-        # Metrics are updated after every loop
-        for metric in metrics:
-            metric.update(output[0], target[..., 0])
-            stats[metric.name] = metric.score()
+            # Metrics are updated after every loop
+            for metric in metrics:
+                metric.update(output[0], target[..., 0])
+                stats[metric.name] = metric.score()
 
-        pbar.set_postfix(**stats)
-        pbar.update()
-    pbar.close()
+            pbar.set_postfix(**stats)
+            pbar.update()
+        pbar.close()
 
     for m in metrics:
         print("→ {}: {:.3f} / {:.3f}".format(m.name, m.score(), m.mean()))
@@ -124,6 +124,5 @@ if __name__ == "__main__":
     parser.add_argument("--embedding_size", default=32, type=int)
     parser.add_argument("--test_area", default=5, type=int)
     parser.add_argument("--lr", default=0.001, type=float)
-    parser.add_argument("--eval_freq", default=10, type=int)
     args = parser.parse_args()
     main(args)

@@ -60,5 +60,6 @@ Torch3d composes of the following modules:
   + PoinNet++ from Qi et al. (NeurIPS 2017) [[Paper](https://arxiv.org/abs/1706.02413)]
   + PointCNN from Li et al. (NeurIPS 2018) [[Paper](https://arxiv.org/abs/1801.07791)]
   + DGCNN from Wang et al. (ToG 2019) [[Paper](https://arxiv.org/abs/1801.07829)]
+  + JSIS3D from Pham et al. (CVPR 2019) [[Paper](https://arxiv.org/abs/1904.00699)]
 - **nn**: Low-level operators that can be used to build up complex 3D neural networks.
 - **transforms**: Common transformations for dataset preprocessing.

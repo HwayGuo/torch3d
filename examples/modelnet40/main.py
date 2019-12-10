@@ -1,12 +1,14 @@
 import tqdm
 import argparse
+import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as data
-import torch3d.datasets as datasets
 import torch3d.models as models
+import torch3d.datasets as dsets
 import torch3d.transforms as transforms
 from torch3d.metrics import Accuracy
+import pyvista as pv
 
 
 def main(args):
@@ -14,7 +16,7 @@ def main(args):
     transform = transforms.ToTensor()
     dataloaders = {
         "train": data.DataLoader(
-            datasets.ModelNet40(
+            dsets.ModelNet40(
                 args.root,
                 train=True,
                 transform=transform,
@@ -26,7 +28,7 @@ def main(args):
             shuffle=True,
         ),
         "test": data.DataLoader(
-            datasets.ModelNet40(
+            dsets.ModelNet40(
                 args.root,
                 train=False,  # now we use the test set
                 transform=transform,
@@ -46,7 +48,7 @@ def main(args):
     # Here comes the training loop
     for epoch in range(args.epochs):
         train_epoch(args, epoch, model, dataloaders["train"], optimizer, criteria)
-        evaluate(args, model, dataloaders["test"])
+    evaluate(args, model, dataloaders["test"])
     print("Done.")
 
 
@@ -77,19 +79,20 @@ def evaluate(args, model, dataloader):
     metrics = [Accuracy(args.num_classes)]
 
     model.eval()
-    for i, (input, target) in enumerate(dataloader):
-        input = input.to(args.device)
-        target = target.to(args.device)
-        output = model(input)
+    with torch.no_grad():
+        for i, (input, target) in enumerate(dataloader):
+            input = input.to(args.device)
+            target = target.to(args.device)
+            output = model(input)
 
-        # Metrics are updated after every loop
-        for metric in metrics:
-            metric.update(output, target)
-            stats[metric.name] = metric.score()
+            # Metrics are updated after every loop
+            for metric in metrics:
+                metric.update(output, target)
+                stats[metric.name] = metric.score()
 
-        pbar.set_postfix(**stats)
-        pbar.update()
-    pbar.close()
+            pbar.set_postfix(**stats)
+            pbar.update()
+        pbar.close()
 
     for m in metrics:
         print("→ {}: {:.3f} / {:.3f}".format(m.name, m.score(), m.mean()))
