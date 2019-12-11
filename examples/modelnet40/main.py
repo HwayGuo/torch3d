@@ -44,47 +44,18 @@ def main(args):
     model = models.PointNet(args.in_channels, args.num_classes).to(args.device)
     optimizer = optim.Adam(model.parameters(), args.lr)
     criteria = nn.CrossEntropyLoss()
-    categories = dsets.ModelNet40.categories
 
     # Showing random samples
     points, labels = next(iter(dataloaders["test"]))
     points = points.transpose(2, 1).numpy()
-
-    pv.set_plot_theme("document")
-    plt = pv.Plotter(shape=(4, 4), window_size=(800, 800))
-    for row in range(4):
-        for col in range(4):
-            i = row * 4 + col
-            plt.subplot(row, col)
-            plt.add_mesh(
-                points[i],
-                render_points_as_spheres=True,
-                point_size=8.0,
-                ambient=0.1,
-                diffuse=0.8,
-                specular=0.5,
-                specular_power=100.0,
-            )
-            plt.add_text(
-                categories[labels[i]],
-                font_size=13,
-                position="upper_edge",
-                font="arial",
-                shadow=False,
-            )
-    plt.link_views()
-    plt.camera_position = [
-        (0.0, 0.0, -5.0),
-        (0.0, 0.0, 0.0),
-        (0.0, 1.0, 0.0),
-    ]
-    plt.show("ModelNet40")
-    plt.close()
+    visualize(points, labels)
 
     # Here comes the training loop
     for epoch in range(args.epochs):
         train_epoch(args, epoch, model, dataloaders["train"], optimizer, criteria)
-    evaluate(args, model, dataloaders["test"])
+
+    predict = evaluate(args, model, dataloaders["test"])
+    visualize(points, labels, predict)
     print("Done.")
 
 
@@ -116,7 +87,7 @@ def evaluate(args, model, dataloader):
 
     model.eval()
     with torch.no_grad():
-        predict = []
+        predict = None
         for i, (input, target) in enumerate(dataloader):
             input = input.to(args.device)
             target = target.to(args.device)
@@ -127,6 +98,9 @@ def evaluate(args, model, dataloader):
                 metric.update(output, target)
                 stats[metric.name] = metric.score()
 
+            if i == 0:
+                predict = torch.argmax(output, 1).cpu().numpy()
+
             pbar.set_postfix(**stats)
             pbar.update()
         pbar.close()
@@ -134,6 +108,51 @@ def evaluate(args, model, dataloader):
     for m in metrics:
         print("→ {}: {:.3f} / {:.3f}".format(m.name, m.score(), m.mean()))
     return predict
+
+
+def visualize(points, labels, predict=None):
+    pv.set_plot_theme("document")
+    plt = pv.Plotter(shape=(4, 4), window_size=(800, 800))
+    for row in range(4):
+        for col in range(4):
+            i = row * 4 + col
+            plt.subplot(row, col)
+            plt.add_mesh(
+                points[i],
+                render_points_as_spheres=True,
+                point_size=8.0,
+                ambient=0.1,
+                diffuse=0.8,
+                specular=0.5,
+                specular_power=100.0,
+            )
+            plt.add_text(
+                dsets.ModelNet40.categories[labels[i]],
+                font_size=13,
+                position="upper_edge",
+                font="arial",
+                shadow=False,
+            )
+            if predict is not None:
+                if predict is not None:
+                    color = "red" if predict[i] != labels[i] else "green"
+                plt.add_text(
+                    dsets.ModelNet40.categories[predict[i]],
+                    font_size=13,
+                    color=color,
+                    position="lower_edge",
+                    font="arial",
+                    shadow=False,
+                )
+    plt.link_views()
+    plt.camera_position = [
+        (0.0, 0.0, -5.0),
+        (0.0, 0.0, 0.0),
+        (0.0, 1.0, 0.0),
+    ]
+    plt.screenshot("image.png")
+    plt.show("ModelNet40")
+    plt.close()
 
 
 if __name__ == "__main__":
