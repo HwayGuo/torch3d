@@ -57,7 +57,7 @@ dataloaders = {
 }
 ```
 
-Now take a look at some test samples for inspection. Here we will use
+Now let us take a look at some test samples for inspection. Here we will use
 [PyVista](https://docs.pyvista.org/), an excellent Pythonic binding for VTK,
 for 3D visualization.
 
@@ -90,9 +90,6 @@ optimize.
 for epoch in range(10):  # train for 10 epochs
     model.train()
     for i, (points, labels) in enumerate(dataloaders["train"]):
-        points = points.to(args.device)
-        labels = labels.to(args.device)
-
         optimizer.zero_grad()
         output = model(points)
         loss = criteria(output, labels)
@@ -113,8 +110,6 @@ metric = metrics.Accuracy(num_classes)
 model.eval()
 with torch.no_grad():  # disable autograd to speed up
     for i, (points, labels) in enumerate(dataloaders["test"]):
-        points = points.to(args.device)
-        labels = labels.to(args.device)
         output = model(points)
         # Metric needs to be updated after every prediction
         metric.update(output, labels)
@@ -122,9 +117,10 @@ print("→ accuracy: {:.3f}".format(m.score()))  # print the final score
 ```
 
 Here we show the test samples again, and their corresponding predictions at the
-bottom. We also color-code our results — green for correct and red for
-incorrect. Voilà!
+bottom. We also color-code our results — green for correct and red for incorrect.
 
 ![Prediction](assets/predict.png?raw=true)
+
+Voilà!
 
 > **Exercise**: Try training with different networks and compare their performance.
