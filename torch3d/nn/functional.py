@@ -10,35 +10,36 @@ def cdist(x, y):
     return sqdist
 
 
-def knn(input, query, k):
-    sqdist = cdist(query, input)
+def knn(p, q, k):
+    sqdist = cdist(q, p)
     return torch.topk(sqdist, k, dim=-1, largest=False)
 
 
-def ball_point(input, query, radius, k):
+def ball_point(p, q, radius, k):
     _C = _lazy_import()
-    return _C.ball_point(input, query, radius, k)
+    return _C.ball_point(p, q, radius, k)
 
 
-def chamfer_loss(input, target):
-    sqdist = cdist(input, target)
+def chamfer_loss(x, y):
+    sqdist = cdist(x, y)
     return torch.mean(sqdist.min(1)[0]) + torch.mean(sqdist.min(2)[0])
 
 
 def discriminative_loss(
-    input, target, alpha=1.0, beta=1.0, gamma=0.001, delta_v=0.5, delta_d=1.5
+    x, y, alpha=1.0, beta=1.0, gamma=0.001, delta_v=0.5, delta_d=1.5, reduction="mean"
 ):
-    batch_size = input.shape[0]
-    channels = input.shape[1]
-    num_points = input.shape[2]
-    device = input.device
+    # TODO: Adhere to reduction rule
+    batch_size = x.shape[0]
+    channels = x.shape[1]
+    num_points = x.shape[2]
+    device = x.device
 
-    sizes = target.max(1)[0] + 1
-    target = F.one_hot(target)
-    K = target.shape[2]
+    sizes = y.max(1)[0] + 1  # number of instances in each sample
+    y = F.one_hot(y)
+    K = y.shape[2]
 
-    x = input.unsqueeze(3).expand(-1, -1, -1, K)
-    y = target.unsqueeze(1)
+    x = x.unsqueeze(3).expand(-1, -1, -1, K)
+    y = y.unsqueeze(1)
     x = x * y
     mu = torch.zeros(batch_size, channels, K).to(device)
     for i in range(batch_size):
@@ -84,41 +85,41 @@ def discriminative_loss(
     return loss
 
 
-def random_point_sample(input, num_samples):
-    num_points = input.shape[1]
+def random_point_sample(p, num_samples):
+    num_points = p.shape[1]
     if num_samples > num_points:
         raise ValueError("num_samples should be less than input size.")
     return torch.randperm(num_points)[:num_samples]
 
 
-def farthest_point_sample(input, num_samples):
-    num_points = input.shape[1]
+def farthest_point_sample(p, num_samples):
+    num_points = p.shape[1]
     if num_samples > num_points:
         raise ValueError("num_samples should be less than input size.")
     _C = _lazy_import()
-    return _C.farthest_point_sample(input, num_samples)
+    return _C.farthest_point_sample(p, num_samples)
 
 
-def batched_index_select(input, dim, index):
-    views = [input.shape[0]]
-    views += [1 if i != dim else -1 for i in range(1, len(input.shape))]
-    expanse = list(input.shape)
+def batched_index_select(x, dim, index):
+    views = [x.shape[0]]
+    views += [1 if i != dim else -1 for i in range(1, len(x.shape))]
+    expanse = list(x.shape)
     expanse[dim] = -1
     index = index.view(views).expand(expanse)
-    return torch.gather(input, dim, index)
+    return torch.gather(x, dim, index)
 
 
-def point_interpolate(input, index, weight):
-    return PointInterpolate.apply(input, index, weight)
+def point_interpolate(x, index, weight):
+    return PointInterpolate.apply(x, index, weight)
 
 
 class PointInterpolate(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, input, index, weight):
-        ctx.num_points = input.shape[2]
+    def forward(ctx, x, index, weight):
+        ctx.num_points = x.shape[2]
         ctx.save_for_backward(index, weight)
         _C = _lazy_import()
-        return _C.point_interpolate(input, index, weight)
+        return _C.point_interpolate(x, index, weight)
 
     @staticmethod
     def backward(ctx, grad):
