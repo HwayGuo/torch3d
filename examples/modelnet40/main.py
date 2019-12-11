@@ -64,13 +64,13 @@ def train_epoch(args, epoch, model, dataloader, optimizer, criteria):
     pbar = tqdm.tqdm(total=len(dataloader), desc=desc)
 
     model.train()
-    for i, (input, target) in enumerate(dataloader):
-        input = input.to(args.device)
-        target = target.to(args.device)
+    for i, (points, labels) in enumerate(dataloader):
+        points = points.to(args.device)
+        labels = labels.to(args.device)
 
         optimizer.zero_grad()
-        output = model(input)
-        loss = criteria(output, target)
+        output = model(points)
+        loss = criteria(output, labels)
         loss.backward()
         optimizer.step()
 
@@ -88,14 +88,14 @@ def evaluate(args, model, dataloader):
     model.eval()
     with torch.no_grad():
         predict = None
-        for i, (input, target) in enumerate(dataloader):
-            input = input.to(args.device)
-            target = target.to(args.device)
-            output = model(input)
+        for i, (points, labels) in enumerate(dataloader):
+            points = points.to(args.device)
+            labels = labels.to(args.device)
+            output = model(points)
 
             # Metrics are updated after every loop
             for metric in metrics:
-                metric.update(output, target)
+                metric.update(output, labels)
                 stats[metric.name] = metric.score()
 
             if i == 0:
@@ -106,7 +106,7 @@ def evaluate(args, model, dataloader):
         pbar.close()
 
     for m in metrics:
-        print("→ {}: {:.3f} / {:.3f}".format(m.name, m.score(), m.mean()))
+        print("→ {}: {:.3f}".format(m.name, m.score()))
     return predict
 
 
@@ -150,7 +150,6 @@ def visualize(points, labels, predict=None):
         (0.0, 0.0, 0.0),
         (0.0, 1.0, 0.0),
     ]
-    plt.screenshot("image.png")
     plt.show("ModelNet40")
     plt.close()
 
