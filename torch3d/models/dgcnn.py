@@ -12,7 +12,7 @@ class DGCNN(nn.Module):
         self.in_channels = in_channels
         self.num_classes = num_classes
         self.dropout = dropout
-        self.conv1 = EdgeConv(self.in_channels, 64, 20, bias=False)
+        self.conv1 = EdgeConv(in_channels, 64, 20, bias=False)
         self.conv2 = EdgeConv(64, 64, 20, bias=False)
         self.conv3 = EdgeConv(64, 128, 20, bias=False)
         self.conv4 = EdgeConv(128, 256, 20, bias=False)
@@ -22,13 +22,13 @@ class DGCNN(nn.Module):
             nn.Linear(1024, 512, bias=False),
             nn.BatchNorm1d(512),
             nn.ReLU(True),
-            nn.Dropout(self.dropout),
+            nn.Dropout(dropout),
             nn.Linear(512, 256, bias=False),
             nn.BatchNorm1d(256),
             nn.ReLU(True),
-            nn.Dropout(self.dropout),
+            nn.Dropout(dropout),
         )
-        self.fc = nn.Linear(256, self.num_classes)
+        self.fc = nn.Linear(256, num_classes)
 
     def forward(self, x):
         x1 = self.conv1(x)

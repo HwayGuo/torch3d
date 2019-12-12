@@ -12,7 +12,7 @@ class PointNet(nn.Module):
         self.num_classes = num_classes
         self.dropout = dropout
         self.mlp1 = nn.Sequential(
-            nn.Conv1d(self.in_channels, 64, 1, bias=False),
+            nn.Conv1d(in_channels, 64, 1, bias=False),
             nn.BatchNorm1d(64),
             nn.Conv1d(64, 64, 1, bias=False),
             nn.BatchNorm1d(64),
@@ -34,11 +34,11 @@ class PointNet(nn.Module):
             nn.Conv1d(512, 256, 1, bias=False),
             nn.BatchNorm1d(256),
             nn.ReLU(True),
-            nn.Dropout(self.dropout),
+            nn.Dropout(dropout),
             nn.Conv1d(256, 128, 1, bias=False),
             nn.BatchNorm1d(128),
             nn.ReLU(True),
-            nn.Dropout(self.dropout),
+            nn.Dropout(dropout),
         )
         self.fc = nn.Conv1d(128, num_classes, 1)
 

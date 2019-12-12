@@ -12,7 +12,7 @@ class PointNet(nn.Module):
         self.num_classes = num_classes
         self.dropout = dropout
         self.mlp1 = nn.Sequential(
-            nn.Conv1d(self.in_channels, 64, 1, bias=False),
+            nn.Conv1d(in_channels, 64, 1, bias=False),
             nn.BatchNorm1d(64),
             nn.ReLU(True),
             nn.Conv1d(64, 64, 1, bias=False),
@@ -32,13 +32,13 @@ class PointNet(nn.Module):
             nn.Linear(1024, 512, bias=False),
             nn.BatchNorm1d(512),
             nn.ReLU(True),
-            nn.Dropout(self.dropout),
+            nn.Dropout(dropout),
             nn.Linear(512, 256, bias=False),
             nn.BatchNorm1d(256),
             nn.ReLU(True),
-            nn.Dropout(self.dropout),
+            nn.Dropout(dropout),
         )
-        self.fc = nn.Linear(256, self.num_classes)
+        self.fc = nn.Linear(256, num_classes)
 
     def forward(self, x):
         x = self.mlp1(x)

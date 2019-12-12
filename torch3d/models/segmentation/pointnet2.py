@@ -16,9 +16,7 @@ class PointNetSSG(nn.Module):
         self.down2 = FarthestPointSample(256)
         self.down3 = FarthestPointSample(64)
         self.down4 = FarthestPointSample(16)
-        self.sa1 = SetAbstraction(
-            self.in_channels + 3, [32, 32, 64], 0.1, 32, bias=False
-        )
+        self.sa1 = SetAbstraction(in_channels + 3, [32, 32, 64], 0.1, 32, bias=False)
         self.sa2 = SetAbstraction(64 + 3, [64, 64, 128], 0.2, 32, bias=False)
         self.sa3 = SetAbstraction(128 + 3, [128, 128, 256], 0.4, 32, bias=False)
         self.sa4 = SetAbstraction(256 + 3, [256, 256, 512], 0.8, 32, bias=False)
@@ -30,13 +28,13 @@ class PointNetSSG(nn.Module):
             nn.Conv1d(128, 128, 1, bias=False),
             nn.BatchNorm1d(128),
             nn.ReLU(True),
-            nn.Dropout(self.dropout),
+            nn.Dropout(dropout),
             nn.Conv1d(128, 128, 1, bias=False),
             nn.BatchNorm1d(128),
             nn.ReLU(True),
-            nn.Dropout(self.dropout),
+            nn.Dropout(dropout),
         )
-        self.fc = nn.Conv1d(128, self.num_classes, 1)
+        self.fc = nn.Conv1d(128, num_classes, 1)
 
     def forward(self, p, x=None):
         q1, x1 = self.down1(p)
