@@ -8,5 +8,6 @@ exclude_lines =
     raise
     except
 omit =
+    torch3d/datasets/*
     tests/*
     setup.py

@@ -42,8 +42,8 @@ class TestPointNet2:
     def test_forward(self):
         self.model.cuda()
         self.model.eval()
-        p = torch.rand(self.batch_size, self.num_points, 3).cuda()
-        y = self.model(p)
+        x = torch.rand(self.batch_size, self.num_points, 3).cuda()
+        y = self.model(x)
         assert y.shape == torch.Size([self.batch_size, self.num_classes])
 
 
@@ -56,8 +56,8 @@ class TestPointCNN:
 
     def test_forward(self):
         self.model.eval()
-        p = torch.rand(self.batch_size, self.num_points, 3)
-        y = self.model(p)
+        x = torch.rand(self.batch_size, self.num_points, 3)
+        y = self.model(x)
         assert y.shape == torch.Size([self.batch_size, self.num_classes])
 
 
@@ -70,8 +70,8 @@ class TestDGCNN:
 
     def test_forward(self):
         self.model.eval()
-        p = torch.rand(self.batch_size, self.in_channels, self.num_points)
-        y = self.model(p)
+        x = torch.rand(self.batch_size, self.in_channels, self.num_points)
+        y = self.model(x)
         assert y.shape == torch.Size([self.batch_size, self.num_classes])
 
 
@@ -88,4 +88,24 @@ class TestDGCNNSegmentation:
         y = self.model(x)
         assert y.shape == torch.Size(
             [self.batch_size, self.num_classes, self.num_points]
+        )
+
+
+class TestJSIS3D:
+    batch_size = 8
+    num_points = 2048
+    in_channels = 3
+    num_classes = 100
+    embedding_size = 32
+    model = models.segmentation.JSIS3D(in_channels, num_classes, embedding_size)
+
+    def test_forward(self):
+        self.model.eval()
+        x = torch.rand(self.batch_size, self.in_channels, self.num_points)
+        y = self.model(x)
+        assert y[0].shape == torch.Size(
+            [self.batch_size, self.num_classes, self.num_points]
+        )
+        assert y[1].shape == torch.Size(
+            [self.batch_size, self.embedding_size, self.num_points]
         )
