@@ -38,7 +38,6 @@ $ pip install --editable .
 
 Here are some examples to get you started. These examples assume that you have a basic understanding of PyTorch.
 - [Point cloud classification (ModelNet40) using PointNet](examples/modelnet40) (Beginner)
-- [Semantic-instance segmentation (S3DIS) using JSIS3D](examples/s3dis) (Intermediate) [[Paper](https://arxiv.org/abs/1904.00699)]
 
 > Take a look at [SotA3d](https://github.com/pqhieu/sota3d) to see how Torch3d is being used in practice.
 
@@ -59,6 +58,5 @@ Torch3d composes of the following modules:
   + PoinNet++ from Qi et al. (NeurIPS 2017) [[Paper](https://arxiv.org/abs/1706.02413)]
   + PointCNN from Li et al. (NeurIPS 2018) [[Paper](https://arxiv.org/abs/1801.07791)]
   + DGCNN from Wang et al. (ToG 2019) [[Paper](https://arxiv.org/abs/1801.07829)]
-  + JSIS3D from Pham et al. (CVPR 2019) [[Paper](https://arxiv.org/abs/1904.00699)]
 - **nn**: Low-level operators that can be used to build up complex 3D neural networks.
 - **transforms**: Common transformations for dataset preprocessing.

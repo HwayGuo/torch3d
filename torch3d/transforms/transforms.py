@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from . import functional as F
+import torch3d.transforms.functional as F
 
 
 __all__ = [
@@ -14,8 +14,9 @@ __all__ = [
 class Compose(object):
     """
     Composes several transforms together.
+
     Args:
-        transforms (list of ``Transform`` objects): list of transforms to compose.
+        transforms (list of ``Transform``): list of transforms to compose.
     Example:
         >>> transforms.Compose([
         >>>     transforms.Shuffle(),
@@ -45,8 +46,8 @@ class Shuffle(object):
         return np.random.permutation(n)
 
     def __call__(self, pcd):
-        perm = self.get_params(pcd)
-        return F.shuffle(pcd, perm)
+        index = self.get_params(pcd)
+        return pcd[index]
 
 
 class RandomSample(object):
@@ -58,13 +59,13 @@ class RandomSample(object):
         n = len(pcd)
         assert n > 0
         if n >= num_samples:
-            samples = np.random.choice(n, num_samples, replace=False)
+            index = np.random.choice(n, num_samples, replace=False)
         else:
             m = num_samples - n
-            samples = np.random.choice(n, m, replace=True)
-            samples = list(range(n)) + list(samples)
-        return samples
+            index = np.random.choice(n, m, replace=True)
+            index = list(range(n)) + list(index)
+        return index
 
     def __call__(self, pcd):
-        samples = self.get_params(pcd, self.num_samples)
-        return F.sample(pcd, samples)
+        index = self.get_params(pcd, self.num_samples)
+        return pcd[index]
