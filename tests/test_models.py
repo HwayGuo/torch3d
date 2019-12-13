@@ -2,110 +2,34 @@ import torch
 import torch3d.models as models
 
 
-class TestPointNet:
+class TestClassification:
     batch_size = 8
     num_points = 2048
     in_channels = 3
     num_classes = 100
-    model = models.PointNet(in_channels, num_classes)
+    points = torch.rand(batch_size, in_channels, num_points)
+    output_shape = torch.Size([batch_size, num_classes])
 
-    def test_forward(self):
-        self.model.eval()
-        x = torch.rand(self.batch_size, self.in_channels, self.num_points)
-        y = self.model(x)
-        assert y.shape == torch.Size([self.batch_size, self.num_classes])
+    def test_pointnet(self):
+        model = models.PointNet(self.in_channels, self.num_classes)
+        model.eval()
+        output = model(self.points)
+        assert output.shape == self.output_shape
 
+    def test_pointnet2(self):
+        model = models.PointNetSSG(self.in_channels - 3, self.num_classes).cuda()
+        model.eval()
+        output = model(self.points.transpose(2, 1).cuda())
+        assert output.shape == self.output_shape
 
-class TestPointNetSegmentation:
-    batch_size = 8
-    num_points = 2048
-    in_channels = 3
-    num_classes = 100
-    model = models.segmentation.PointNet(in_channels, num_classes)
+    def test_pointcnn(self):
+        model = models.PointCNN(self.in_channels - 3, self.num_classes)
+        model.eval()
+        output = model(self.points.transpose(2, 1))
+        assert output.shape == self.output_shape
 
-    def test_forward(self):
-        self.model.eval()
-        x = torch.rand(self.batch_size, self.in_channels, self.num_points)
-        y = self.model(x)
-        assert y.shape == torch.Size(
-            [self.batch_size, self.num_classes, self.num_points]
-        )
-
-
-class TestPointNet2:
-    batch_size = 8
-    num_points = 2048
-    in_channels = 0
-    num_classes = 100
-    model = models.PointNetSSG(in_channels, num_classes)
-
-    def test_forward(self):
-        self.model.cuda()
-        self.model.eval()
-        x = torch.rand(self.batch_size, self.num_points, 3).cuda()
-        y = self.model(x)
-        assert y.shape == torch.Size([self.batch_size, self.num_classes])
-
-
-class TestPointCNN:
-    batch_size = 8
-    num_points = 2048
-    in_channels = 0
-    num_classes = 100
-    model = models.PointCNN(in_channels, num_classes)
-
-    def test_forward(self):
-        self.model.eval()
-        x = torch.rand(self.batch_size, self.num_points, 3)
-        y = self.model(x)
-        assert y.shape == torch.Size([self.batch_size, self.num_classes])
-
-
-class TestDGCNN:
-    batch_size = 8
-    num_points = 2048
-    in_channels = 3
-    num_classes = 100
-    model = models.DGCNN(in_channels, num_classes)
-
-    def test_forward(self):
-        self.model.eval()
-        x = torch.rand(self.batch_size, self.in_channels, self.num_points)
-        y = self.model(x)
-        assert y.shape == torch.Size([self.batch_size, self.num_classes])
-
-
-class TestDGCNNSegmentation:
-    batch_size = 8
-    num_points = 2048
-    in_channels = 3
-    num_classes = 100
-    model = models.segmentation.DGCNN(in_channels, num_classes)
-
-    def test_forward(self):
-        self.model.eval()
-        x = torch.rand(self.batch_size, self.in_channels, self.num_points)
-        y = self.model(x)
-        assert y.shape == torch.Size(
-            [self.batch_size, self.num_classes, self.num_points]
-        )
-
-
-class TestJSIS3D:
-    batch_size = 8
-    num_points = 2048
-    in_channels = 3
-    num_classes = 100
-    embedding_size = 32
-    model = models.segmentation.JSIS3D(in_channels, num_classes, embedding_size)
-
-    def test_forward(self):
-        self.model.eval()
-        x = torch.rand(self.batch_size, self.in_channels, self.num_points)
-        y = self.model(x)
-        assert y[0].shape == torch.Size(
-            [self.batch_size, self.num_classes, self.num_points]
-        )
-        assert y[1].shape == torch.Size(
-            [self.batch_size, self.embedding_size, self.num_points]
-        )
+    def test_dgcnn(self):
+        model = models.DGCNN(self.in_channels, self.num_classes)
+        model.eval()
+        output = model(self.points)
+        assert output.shape == self.output_shape
