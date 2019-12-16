@@ -21,14 +21,26 @@ static __inline__ __device__ double atomicAdd(double* address, double val)
 }
 #endif
 
+#define CUDA_CHECK_ERRORS()                                    \
+    do {                                                       \
+        cudaError_t err = cudaGetLastError();                  \
+        if (cudaSuccess != err) {                              \
+            fprintf(                                           \
+                stderr,                                        \
+                "CUDA kernel failed : %s\n%s at L:%d in %s\n", \
+                cudaGetErrorString(err),                       \
+                __PRETTY_FUNCTION__,                           \
+                __LINE__,                                      \
+                __FILE__);                                     \
+            exit(-1);                                          \
+        }                                                      \
+    } while (0)
 
-at::Tensor farthest_point_sample_cuda(const at::Tensor& input, int m);
+#define NUM_THREADS 512
 
-at::Tensor ball_point_cuda(
-    const at::Tensor& input,
-    const at::Tensor& query,
-    float radius,
-    int k);
+
+at::Tensor farthest_point_sample_cuda(const at::Tensor& p, int num_samples);
+at::Tensor ball_point_cuda(const at::Tensor& p, const at::Tensor& q, int k, float radius);
 
 at::Tensor point_interpolate_cuda(
     const at::Tensor& input,

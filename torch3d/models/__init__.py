@@ -1,4 +1,4 @@
-from .pointnet import *
+from .pointnet import PointNet
 from .pointnet2 import *
 from .pointcnn import *
 from .dgcnn import *

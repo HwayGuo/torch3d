@@ -126,21 +126,21 @@ class SetAbstraction(nn.Module):
     def forward(self, p, q, x=None):
         batch_size = p.shape[0]
         if self.radius is not None:
-            index = F.ball_point(p, q, self.radius, self.k)
-            views = list(index.shape) + [-1]
-            p = F.batched_index_select(p, 1, index.view(batch_size, -1))
-            p = p.view(views)
+            index = F.ball_point(p, q, self.k, self.radius)
+            index = index.view(batch_size, -1)
+            p = torch.gather(p, 1, index.unsqueeze(2).expand(-1, -1, 3))
+            p = p.view(batch_size, -1, self.k, 3)
             p_hat = p - q.unsqueeze(2)
             x_hat = p_hat
         else:
             x_hat = p.unsqueeze(1)
         if x is not None:
             x = x.permute(0, 2, 1)
-            x = (
-                F.batched_index_select(x, 1, index.view(batch_size, -1)).view(views)
-                if self.radius
-                else x.unsqueeze(1)
-            )
+            if self.radius:
+                x = torch.gather(x, 1, index.unsqueeze(2).expand(-1, -1, x.shape[2]))
+                x = x.view(batch_size, -1, self.k, x.shape[2])
+            else:
+                x = x.unsqueeze(1)
             x_hat = torch.cat([x_hat, x], dim=-1)
         x = x_hat.permute(0, 3, 1, 2)
         x = self.mlp(x)

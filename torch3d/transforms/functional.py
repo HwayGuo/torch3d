@@ -17,7 +17,6 @@ def _is_numpy_pcd(pcd):
 def to_tensor(pcd):
     """
     Convert a ``numpy.ndarray`` point cloud to `Tensor`.
-
     """
 
     if not _is_numpy(pcd):
@@ -28,5 +27,5 @@ def to_tensor(pcd):
             "pcd should be 2 dimensional. Got {} dimensions.".format(pcd.ndim)
         )
 
-    pcd = torch.tensor(pcd.T)
+    pcd = torch.from_numpy(pcd.T)
     return pcd

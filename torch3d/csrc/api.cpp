@@ -2,23 +2,24 @@
 #include "cuda/cuda.h"
 
 
-at::Tensor farthest_point_sample(const at::Tensor& input, int m)
+at::Tensor farthest_point_sample(const at::Tensor& p, int num_samples)
 {
-    if (input.type().is_cuda()) {
-        return farthest_point_sample_cuda(input, m);
+    CHECK_CONTIGUOUS(p);
+
+    if (p.type().is_cuda()) {
+        return farthest_point_sample_cuda(p, num_samples);
     }
     AT_ERROR("Not compiled with GPU support");
 }
 
 
-at::Tensor ball_point(
-    const at::Tensor& input,
-    const at::Tensor& query,
-    float radius,
-    int k)
+at::Tensor ball_point(const at::Tensor& p, const at::Tensor& q, int k, float radius)
 {
-    if (input.type().is_cuda()) {
-        return ball_point_cuda(input, query, radius, k);
+    CHECK_CONTIGUOUS(p);
+    CHECK_CONTIGUOUS(q);
+
+    if (p.type().is_cuda()) {
+        return ball_point_cuda(p, q, k, radius);
     }
     AT_ERROR("Not compiled with GPU support");
 }

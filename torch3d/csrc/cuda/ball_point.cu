@@ -1,81 +1,75 @@
 #include "cuda.h"
 
 
-constexpr int num_threads = 256;
-
-
 template <typename T>
 __global__ void ball_point_kernel(
-    const T* input,
-    const T* query,
-    int batch_size,
-    int n,
-    int m,
-    int channels,
+    const T* p,
+    const T* q,
+    int B,
+    int N,
+    int M,
+    int C,
+    int K,
     float radius,
-    int k,
     int64_t* __restrict__ index)
 {
     int b = blockIdx.x;
 
-    input += b * n * channels;
-    query += b * m * channels;
-    index += b * m * k;
+    p += b * N * C;
+    q += b * M * C;
+    index += b * M * K;
 
     int tid = threadIdx.x;
     float r2 = radius * radius;
 
-    for (int i = tid; tid < m; tid += num_threads) {
-        int count = 0;
-        for (int j = 0; j < n; ++j) {
-            T dist = 0;
-            for (int c = 0; c < channels; ++c) {
-                T d = query[i * channels + c] - input[j * channels + c];
-                dist += d * d;
-            }
+    for (int64_t i = tid; i < M; i += NUM_THREADS) {
+        int64_t k = 0;
+        T x = q[i * C + 0];
+        T y = q[i * C + 1];
+        T z = q[i * C + 2];
 
-            if (dist < r2) {
-                if (count == 0) {
-                    for (int l = 0; l < k; ++l)
-                        index[i * k + l] = j;
+        for (int64_t ii = 0; ii < N && k < K; ++ii) {
+            T xx = p[ii * C + 0] - x;
+            T yy = p[ii * C + 1] - y;
+            T zz = p[ii * C + 2] - z;
+            T d2 = xx * xx + yy * yy + zz * zz;
+
+            if (d2 < r2) {
+                if (k == 0) {
+                    for (int l = 0; l < K; ++l)
+                        index[i * K + l] = ii;
                 }
-                index[i * k + count] = j;
-                ++count;
+                index[i * K + k] = ii;
+                ++k;
             }
-            if (count >= k)
-                break;
         }
     }
 }
 
 
-at::Tensor ball_point_cuda(
-    const at::Tensor& input,
-    const at::Tensor& query,
-    float radius,
-    int k)
+at::Tensor ball_point_cuda(const at::Tensor& p, const at::Tensor& q, int K, float radius)
 {
-    int batch_size = input.size(0);
-    int n = input.size(1);
-    int m = query.size(1);
-    int channels = input.size(2);
-    at::Tensor index = at::zeros({batch_size, m, k}, input.options().dtype(at::kLong));
+    int B = p.size(0);
+    int N = p.size(1);
+    int M = q.size(1);
+    int C = p.size(2);
+    at::Tensor index = at::zeros({B, M, K}, p.options().dtype(at::kLong));
 
-    AT_DISPATCH_FLOATING_TYPES(input.type(), "ball_point_cuda", [&] {
-        dim3 block(num_threads);
-        dim3 grid(batch_size);
-        cudaStream_t stream = at::cuda::getCurrentCUDAStream();
-        ball_point_kernel<scalar_t><<<grid, block, 0, stream>>>(
-            input.contiguous().data<scalar_t>(),
-            query.contiguous().data<scalar_t>(),
-            batch_size,
-            n,
-            m,
-            channels,
+    AT_DISPATCH_FLOATING_TYPES(p.scalar_type(), "ball_point_cuda", [&] {
+        dim3 block(NUM_THREADS);
+        dim3 grid(B);
+        ball_point_kernel<scalar_t><<<grid, block>>>(
+            p.data_ptr<scalar_t>(),
+            q.data_ptr<scalar_t>(),
+            B,
+            N,
+            M,
+            C,
+            K,
             radius,
-            k,
             index.data<int64_t>());
     });
+    CUDA_CHECK_ERRORS();
 
     return index;
 }

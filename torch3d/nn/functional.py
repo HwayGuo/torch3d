@@ -15,14 +15,9 @@ def knn(p, q, k):
     return torch.topk(sqdist, k, dim=-1, largest=False)
 
 
-def ball_point(p, q, radius, k):
+def ball_point(p, q, k, radius):
     _C = _lazy_import()
-    return _C.ball_point(p, q, radius, k)
-
-
-def chamfer_loss(x, y):
-    sqdist = cdist(x, y)
-    return torch.mean(sqdist.min(1)[0]) + torch.mean(sqdist.min(2)[0])
+    return _C.ball_point(p, q, k, radius)
 
 
 def random_point_sample(p, num_samples):

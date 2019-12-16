@@ -1,14 +1,6 @@
 import torch
 import numpy as np
-import torch3d.transforms.functional as F
-
-
-__all__ = [
-    "Compose",
-    "ToTensor",
-    "Shuffle",
-    "RandomSample",
-]
+from torch3d.transforms import functional as F
 
 
 class Compose(object):
@@ -50,7 +42,7 @@ class Shuffle(object):
         return pcd[index]
 
 
-class RandomSample(object):
+class RandomPointSample(object):
     def __init__(self, num_samples):
         self.num_samples = num_samples
 
