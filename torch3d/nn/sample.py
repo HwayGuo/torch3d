@@ -16,9 +16,7 @@ class RandomPointSample(nn.Module):
 
     def forward(self, p, x=None):
         index = F.random_point_sample(p, self.num_samples)
-        if x is not None:
-            x = x[:, :, index]
-        p = p[:, index]
+        p = p[..., index]
         return p, x
 
 

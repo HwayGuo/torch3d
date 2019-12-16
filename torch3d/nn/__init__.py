@@ -1,2 +1,2 @@
-from .conv import EdgeConv, SetConv
+from .conv import EdgeConv, SetConv, XConv
 from .sample import *

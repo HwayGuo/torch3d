@@ -3,9 +3,6 @@ import torch.nn as nn
 from torch3d.nn import XConv, RandomPointSample
 
 
-__all__ = ["PointCNN"]
-
-
 class PointCNN(nn.Module):
     def __init__(self, in_channels, num_classes, dropout=0.5):
         super(PointCNN, self).__init__()
@@ -17,9 +14,9 @@ class PointCNN(nn.Module):
         self.down3 = RandomPointSample(128)
         self.down4 = RandomPointSample(128)
         self.conv1 = XConv(in_channels, 48, 8, dilation=1, bias=False)
-        self.conv2 = XConv(48, 96, 12, dilation=2, bias=False)
-        self.conv3 = XConv(96, 192, 16, dilation=2, bias=False)
-        self.conv4 = XConv(192, 384, 16, dilation=3, bias=False)
+        self.conv2 = XConv(48 + 3, 96, 12, dilation=2, bias=False)
+        self.conv3 = XConv(96 + 3, 192, 16, dilation=2, bias=False)
+        self.conv4 = XConv(192 + 3, 384, 16, dilation=3, bias=False)
         self.mlp = nn.Sequential(
             nn.Conv1d(384, 256, 1, bias=False),
             nn.BatchNorm1d(256),

@@ -21,7 +21,7 @@ def ball_point(p, q, k, radius):
 
 
 def random_point_sample(p, num_samples):
-    num_points = p.shape[1]
+    num_points = p.shape[2]
     if num_samples > num_points:
         raise ValueError("num_samples should be less than input size.")
     return torch.randperm(num_points)[:num_samples]
