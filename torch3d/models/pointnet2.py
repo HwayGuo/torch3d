@@ -1,9 +1,6 @@
 import torch
 import torch.nn as nn
-from torch3d.nn import SetAbstraction, FarthestPointSample
-
-
-__all__ = ["PointNetSSG"]
+from torch3d.nn import SetConv, FarthestPointSample
 
 
 class PointNetSSG(nn.Module):
@@ -14,9 +11,9 @@ class PointNetSSG(nn.Module):
         self.dropout = dropout
         self.down1 = FarthestPointSample(512)
         self.down2 = FarthestPointSample(128)
-        self.sa1 = SetAbstraction(in_channels + 3, [64, 64, 128], 0.2, 32, bias=False)
-        self.sa2 = SetAbstraction(128 + 3, [128, 128, 256], 0.4, 64, bias=False)
-        self.sa3 = SetAbstraction(256 + 3, [256, 512, 1024], None, 128, bias=False)
+        self.sa1 = SetConv(in_channels + 3, [64, 64, 128], 0.2, 32, bias=False)
+        self.sa2 = SetConv(128 + 3, [128, 128, 256], 0.4, 64, bias=False)
+        self.sa3 = SetConv(256 + 3, [256, 512, 1024], None, 128, bias=False)
         self.mlp = nn.Sequential(
             nn.Linear(1024, 512, bias=False),
             nn.BatchNorm1d(512),
@@ -39,8 +36,3 @@ class PointNetSSG(nn.Module):
         x = self.mlp(x)
         x = self.fc(x)
         return x
-
-
-class PointNetMSG(nn.Module):
-    def __init__(self, in_channels, num_classes):
-        pass

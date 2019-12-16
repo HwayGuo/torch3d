@@ -1,2 +1,2 @@
-from .layers import *
+from .conv import EdgeConv, SetConv
 from .sample import *

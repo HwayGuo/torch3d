@@ -3,9 +3,6 @@ import torch.nn as nn
 from torch3d.nn import EdgeConv
 
 
-__all__ = ["DGCNN"]
-
-
 class DGCNN(nn.Module):
     def __init__(self, in_channels, num_classes, dropout=0.5):
         super(DGCNN, self).__init__()

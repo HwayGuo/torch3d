@@ -4,15 +4,15 @@ from torch3d.extension import _lazy_import
 
 
 def cdist(x, y):
-    xx = x.pow(2).sum(dim=2, keepdim=True)
-    yy = y.pow(2).sum(dim=2, keepdim=True).transpose(2, 1)
-    sqdist = torch.baddbmm(yy, x, y.transpose(2, 1), alpha=-2).add_(xx)
+    xx = x.pow(2).sum(dim=1, keepdim=True).permute(0, 2, 1)
+    yy = y.pow(2).sum(dim=1, keepdim=True)
+    sqdist = torch.baddbmm(yy, x.permute(0, 2, 1), y, alpha=-2).add_(xx)
     return sqdist
 
 
 def knn(p, q, k):
     sqdist = cdist(q, p)
-    return torch.topk(sqdist, k, dim=-1, largest=False)
+    return torch.topk(sqdist, k, dim=2, largest=False)
 
 
 def ball_point(p, q, k, radius):
@@ -42,24 +42,3 @@ def batched_index_select(x, dim, index):
     expanse[dim] = -1
     index = index.view(views).expand(expanse)
     return torch.gather(x, dim, index)
-
-
-def point_interpolate(x, index, weight):
-    return PointInterpolate.apply(x, index, weight)
-
-
-class PointInterpolate(torch.autograd.Function):
-    @staticmethod
-    def forward(ctx, x, index, weight):
-        ctx.num_points = x.shape[2]
-        ctx.save_for_backward(index, weight)
-        _C = _lazy_import()
-        return _C.point_interpolate(x, index, weight)
-
-    @staticmethod
-    def backward(ctx, grad):
-        num_points = ctx.num_points
-        index, weight = ctx.saved_tensors
-        _C = _lazy_import()
-        output = _C.point_interpolate_grad(grad, index, weight, num_points)
-        return output, None, None
