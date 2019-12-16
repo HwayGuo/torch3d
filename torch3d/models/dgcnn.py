@@ -4,6 +4,10 @@ from torch3d.nn import EdgeConv
 
 
 class DGCNN(nn.Module):
+    """
+    DGCNN classification model from `"Dynamic Graph CNN for Learning on Point Clouds" <https://arxiv.org/abs/1801.07829>`_.
+    """
+
     def __init__(self, in_channels, num_classes, dropout=0.5):
         super(DGCNN, self).__init__()
         self.in_channels = in_channels
