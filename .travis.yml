@@ -8,8 +8,9 @@ install:
   - pip install torchvision
   - pip install h5py
   - pip install pytest pytest-cov codecov
+  - pip install --editable .
 script:
-  - python setup.py install
-  - pytest --cov=torch3d tests/
+  - pytest --cov-config .coveragerc --cov torch3d tests
 after_success:
+  - coverage report
   - codecov
