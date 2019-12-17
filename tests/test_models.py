@@ -3,7 +3,7 @@ import torch3d.models as models
 
 
 def test_classification():
-    names = ["PointNet", "PointCNN", "DGCNN"]
+    names = ["PointNet", "DGCNN"]
     batch_size = 8
     in_channels = 3
     num_points = 2048
