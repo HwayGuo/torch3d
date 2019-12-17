@@ -1,9 +1,7 @@
-from .conv import EdgeConv, SetConv, XConv
-from .sample import *
+from .conv import EdgeConv, SetConv
 
 
 __all__ = [
     "EdgeConv",
     "SetConv",
-    "XConv",
 ]

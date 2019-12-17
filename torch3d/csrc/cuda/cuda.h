@@ -1,5 +1,4 @@
 // -*- mode: c++ -*-
-#include <ATen/cuda/CUDAContext.h>
 #include <torch/types.h>
 
 #if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 600
@@ -36,18 +35,8 @@ static __inline__ __device__ double atomicAdd(double* address, double val)
         }                                                      \
     } while (0)
 
-#define NUM_THREADS 512
+#define NUM_THREADS 256
 
 
 at::Tensor farthest_point_sample_cuda(const at::Tensor& p, int num_samples);
 at::Tensor ball_point_cuda(const at::Tensor& p, const at::Tensor& q, int k, float radius);
-
-at::Tensor point_interpolate_cuda(
-    const at::Tensor& input,
-    const at::Tensor& index,
-    const at::Tensor& weight);
-at::Tensor point_interpolate_grad_cuda(
-    const at::Tensor& grad,
-    const at::Tensor& index,
-    const at::Tensor& weight,
-    int n);

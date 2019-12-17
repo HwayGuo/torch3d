@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch3d.nn import SetConv, FarthestPointSample
+from torch3d.nn import SetConv
 
 
 class PointNetSSG(nn.Module):
@@ -9,11 +9,9 @@ class PointNetSSG(nn.Module):
         self.in_channels = in_channels
         self.num_classes = num_classes
         self.dropout = dropout
-        self.down1 = FarthestPointSample(512)
-        self.down2 = FarthestPointSample(128)
-        self.sa1 = SetConv(in_channels + 3, [64, 64, 128], 0.2, 32, bias=False)
-        self.sa2 = SetConv(128 + 3, [128, 128, 256], 0.4, 64, bias=False)
-        self.sa3 = SetConv(256 + 3, [256, 512, 1024], None, 128, bias=False)
+        self.conv1 = SetConv(in_channels, [64, 64, 128], 32, 2, 0.2, bias=False)
+        self.conv2 = SetConv(128 + 3, [128, 128, 256], 64, 2, 0.4, bias=False)
+        self.conv3 = SetConv(256 + 3, [256, 512, 1024], 128, 4, None, bias=False)
         self.mlp = nn.Sequential(
             nn.Linear(1024, 512, bias=False),
             nn.BatchNorm1d(512),
@@ -26,12 +24,10 @@ class PointNetSSG(nn.Module):
         )
         self.fc = nn.Linear(256, num_classes)
 
-    def forward(self, p, x=None):
-        q, _ = self.down1(p)
-        p, x = self.sa1(p, q, x)
-        q, _ = self.down2(p)
-        p, x = self.sa2(p, q, x)
-        _, x = self.sa3(p, None, x)
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
         x = x.squeeze(2)
         x = self.mlp(x)
         x = self.fc(x)

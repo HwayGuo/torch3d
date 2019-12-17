@@ -1,9 +1,6 @@
 #include "cuda.h"
 
 
-constexpr int num_threads = 256;
-
-
 template <typename T>
 __device__ void __update(
     T* __restrict__ sdist,
@@ -22,130 +19,132 @@ __device__ void __update(
 
 template <typename T>
 __global__ void farthest_point_sample_kernel(
-    const T* __restrict__ input,
-    int batch_size,
-    int n,
-    int m,
-    int channels,
+    const T* __restrict__ p,
+    int B,
+    int N,
+    int M,
+    int C,
     T* __restrict__ sqdist,
     int64_t* __restrict__ index)
 {
-    __shared__ T sdist[num_threads];
-    __shared__ int64_t sdist_i[num_threads];
+    __shared__ T sdist[NUM_THREADS];
+    __shared__ int64_t sdist_i[NUM_THREADS];
 
     int b = blockIdx.x;
 
-    input += b * n * channels;
-    sqdist += b * n;
-    index += b * m;
+    p += b * C * N;
+    sqdist += b * N;
+    index += b * M;
 
-    int64_t prev = 0;
+    int64_t i = 0;
     int tid = threadIdx.x;
-    if (tid == 0)
-        index[prev] = 0;
 
-    __syncthreads();
-    for (int64_t i = 1; i < m; ++i) {
+    for (int64_t m = 1; m < M; ++m) {
         T maxval = 0;
-        int argmax = 0;
-        for (int64_t k = tid; k < n; k += num_threads) {
-            T dist = 0;
-            for (int64_t c = 0; c < channels; ++c) {
-                T d = input[k * channels + c] - input[prev * channels + c];
-                dist += d * d;
+        int64_t argmax = 0;
+        T x = p[0 * N + i];
+        T y = p[1 * N + i];
+        T z = p[2 * N + i];
+
+        for (int ii = tid; ii < N; ii += NUM_THREADS) {
+            T xx = p[0 * N + ii] - x;
+            T yy = p[1 * N + ii] - y;
+            T zz = p[2 * N + ii] - z;
+            T d = xx * xx + yy * yy + zz * zz;
+            d = min(d, sqdist[ii]);
+            sqdist[ii] = d;
+            if (d > maxval) {
+                argmax = ii;
+                maxval = d;
             }
-            dist = min(dist, sqdist[k]);
-            sqdist[k] = dist;
-            argmax = dist > maxval ? k : argmax;
-            maxval = dist > maxval ? dist : maxval;
         }
         sdist[tid] = maxval;
         sdist_i[tid] = argmax;
         __syncthreads();
 
-        if (num_threads >= 512) {
+        if (NUM_THREADS >= 512) {
             if (tid < 256) {
                 __update(sdist, sdist_i, tid, tid + 256);
             }
             __syncthreads();
         }
-        if (num_threads >= 256) {
+        if (NUM_THREADS >= 256) {
             if (tid < 128) {
                 __update(sdist, sdist_i, tid, tid + 128);
             }
             __syncthreads();
         }
-        if (num_threads >= 128) {
+        if (NUM_THREADS >= 128) {
             if (tid < 64) {
                 __update(sdist, sdist_i, tid, tid + 64);
             }
             __syncthreads();
         }
-        if (num_threads >= 64) {
+        if (NUM_THREADS >= 64) {
             if (tid < 32) {
                 __update(sdist, sdist_i, tid, tid + 32);
             }
             __syncthreads();
         }
-        if (num_threads >= 32) {
+        if (NUM_THREADS >= 32) {
             if (tid < 16) {
                 __update(sdist, sdist_i, tid, tid + 16);
             }
             __syncthreads();
         }
-        if (num_threads >= 16) {
+        if (NUM_THREADS >= 16) {
             if (tid < 8) {
                 __update(sdist, sdist_i, tid, tid + 8);
             }
             __syncthreads();
         }
-        if (num_threads >= 8) {
+        if (NUM_THREADS >= 8) {
             if (tid < 4) {
                 __update(sdist, sdist_i, tid, tid + 4);
             }
             __syncthreads();
         }
-        if (num_threads >= 4) {
+        if (NUM_THREADS >= 4) {
             if (tid < 2) {
                 __update(sdist, sdist_i, tid, tid + 2);
             }
             __syncthreads();
         }
-        if (num_threads >= 2) {
+        if (NUM_THREADS >= 2) {
             if (tid < 1) {
                 __update(sdist, sdist_i, tid, tid + 1);
             }
             __syncthreads();
         }
 
-        prev = sdist_i[0];
+        i = sdist_i[0];
         if (tid == 0)
-            index[i] = prev;
+            index[m] = i;
     }
 }
 
 
-at::Tensor farthest_point_sample_cuda(const at::Tensor& input, int m)
+at::Tensor farthest_point_sample_cuda(const at::Tensor& p, int M)
 {
-    int batch_size = input.size(0);
-    int n = input.size(1);
-    int channels = input.size(2);
-    at::Tensor index = at::zeros({batch_size, m}, input.options().dtype(at::kLong));
-    at::Tensor sqdist = at::zeros({batch_size, n}, input.options()).fill_(1e10);
+    int B = p.size(0);
+    int N = p.size(2);
+    int C = p.size(1);
+    at::Tensor index = at::zeros({B, M}, p.options().dtype(at::kLong));
+    at::Tensor sqdist = at::zeros({B, N}, p.options()).fill_(1e10);
 
-    AT_DISPATCH_FLOATING_TYPES(input.type(), "farthest_point_sample_cuda", [&] {
-        dim3 block(num_threads);
-        dim3 grid(batch_size);
-        cudaStream_t stream = at::cuda::getCurrentCUDAStream();
-        farthest_point_sample_kernel<scalar_t><<<grid, block, 0, stream>>>(
-            input.contiguous().data<scalar_t>(),
-            batch_size,
-            n,
-            m,
-            channels,
-            sqdist.data<scalar_t>(),
-            index.data<int64_t>());
+    AT_DISPATCH_FLOATING_TYPES(p.scalar_type(), "farthest_point_sample_cuda", [&] {
+        dim3 block(NUM_THREADS);
+        dim3 grid(B);
+        farthest_point_sample_kernel<scalar_t><<<grid, block>>>(
+            p.data_ptr<scalar_t>(),
+            B,
+            N,
+            M,
+            C,
+            sqdist.data_ptr<scalar_t>(),
+            index.data_ptr<int64_t>());
     });
+    CUDA_CHECK_ERRORS();
 
     return index;
 }

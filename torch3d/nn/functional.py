@@ -17,28 +17,15 @@ def knn(p, q, k):
 
 def ball_point(p, q, k, radius):
     _C = _lazy_import()
-    return _C.ball_point(p, q, k, radius)
-
-
-def random_point_sample(p, num_samples):
-    num_points = p.shape[2]
-    if num_samples > num_points:
-        raise ValueError("num_samples should be less than input size.")
-    return torch.randperm(num_points)[:num_samples]
+    return _C.ball_point(p.contiguous(), q.contiguous(), k, radius)
 
 
 def farthest_point_sample(p, num_samples):
-    num_points = p.shape[1]
+    in_channels = p.shape[1]
+    num_points = p.shape[2]
     if num_samples > num_points:
         raise ValueError("num_samples should be less than input size.")
     _C = _lazy_import()
-    return _C.farthest_point_sample(p, num_samples)
-
-
-def batched_index_select(x, dim, index):
-    views = [x.shape[0]]
-    views += [1 if i != dim else -1 for i in range(1, len(x.shape))]
-    expanse = list(x.shape)
-    expanse[dim] = -1
-    index = index.view(views).expand(expanse)
-    return torch.gather(x, dim, index)
+    index = _C.farthest_point_sample(p.contiguous(), num_samples)
+    index = index.unsqueeze(1).expand(-1, in_channels, -1)
+    return torch.gather(p, 2, index)
