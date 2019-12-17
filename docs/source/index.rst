@@ -13,3 +13,4 @@ Torch3d documentation
 
    modules/datasets
    modules/models
+   modules/nn

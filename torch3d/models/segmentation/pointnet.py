@@ -2,9 +2,6 @@ import torch
 import torch.nn as nn
 
 
-__all__ = ["PointNet"]
-
-
 class PointNet(nn.Module):
     def __init__(self, in_channels, num_classes, dropout=0.5):
         super(PointNet, self).__init__()

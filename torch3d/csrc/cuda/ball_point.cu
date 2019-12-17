@@ -3,8 +3,8 @@
 
 template <typename T>
 __global__ void ball_point_kernel(
-    const T* p,
-    const T* q,
+    const T* __restrict__ p,
+    const T* __restrict__ q,
     int B,
     int N,
     int M,

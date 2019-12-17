@@ -156,6 +156,5 @@ class SceneNN(VisionDataset):
         for scn in self.split:
             basename = "scenenn_seg_" + scn + ".hdf5"
             if not os.path.exists(os.path.join(self.root, self.name, basename)):
-                print(os.path.join(self.root, self.name, basename))
                 return False
         return True
