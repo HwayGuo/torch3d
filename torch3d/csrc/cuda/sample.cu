@@ -50,12 +50,13 @@ __global__ void farthest_point_sample_kernel(
             T xx = p[0 * N + ii] - x;
             T yy = p[1 * N + ii] - y;
             T zz = p[2 * N + ii] - z;
-            T d = xx * xx + yy * yy + zz * zz;
-            d = min(d, sqdist[ii]);
-            sqdist[ii] = d;
-            if (d > maxval) {
+            T d2 = xx * xx + yy * yy + zz * zz;
+            d2 = min(d2, sqdist[ii]);
+            sqdist[ii] = d2;
+
+            if (d2 > maxval) {
                 argmax = ii;
-                maxval = d;
+                maxval = d2;
             }
         }
         sdist[tid] = maxval;
