@@ -8,8 +8,8 @@ install:
   - pip install torchvision
   - pip install h5py
   - pip install pytest pytest-cov codecov
-  - pip install .
 script:
-  - pytest --cov=torch3d -k 'not TestPointNet2 and not download' tests/
+  - python setup.py install
+  - pytest --cov=torch3d tests/
 after_success:
   - codecov
