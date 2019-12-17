@@ -27,5 +27,5 @@ def to_tensor(pcd):
             "pcd should be 2 dimensional. Got {} dimensions.".format(pcd.ndim)
         )
 
-    pcd = torch.from_numpy(pcd.T)
+    pcd = torch.as_tensor(pcd.T).contiguous()
     return pcd

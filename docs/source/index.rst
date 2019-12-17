@@ -3,12 +3,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Torch3d Documentation
+Torch3d documentation
 =====================
 
 .. toctree::
    :glob:
    :maxdepth: 1
-   :caption: API
+   :caption: Python API
 
+   modules/datasets
    modules/models
