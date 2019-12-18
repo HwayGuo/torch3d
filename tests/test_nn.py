@@ -57,8 +57,9 @@ def test_ball_point():
             ]
         ]
     )
+    q = p.clone()
     num_points = p.shape[2]
     size = torch.Size([batch_size, k, num_points])
-    index = F.ball_point(p, p, k, radius)
+    index = F.ball_point(p, q, k, radius)
     assert index.shape == size
     assert index.tolist() == [[[0, 1, 2, 3, 4, 5, 6, 7], [0, 1, 2, 3, 4, 5, 6, 7]]]
