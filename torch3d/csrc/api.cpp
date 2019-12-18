@@ -32,7 +32,7 @@ at::Tensor ball_point(const at::Tensor& p, const at::Tensor& q, int k, float rad
         AT_ERROR("Not compiled with GPU support");
 #endif
     }
-    AT_ERROR("Not compiled with GPU support");
+    return ball_point_cpu(p, q, k, radius);
 }
 
 

@@ -67,7 +67,7 @@ at::Tensor ball_point_cuda(const at::Tensor& p, const at::Tensor& q, int K, floa
             C,
             K,
             radius,
-            index.data<int64_t>());
+            index.data_ptr<int64_t>());
     });
     CUDA_CHECK_ERRORS();
 
