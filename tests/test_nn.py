@@ -24,6 +24,23 @@ def test_conv():
         assert conv(x).shape == size
 
 
+def test_deconv():
+    names = ["SetDeconv"]
+    batch_size = 2
+    in_channels = 32
+    out_channels = 64
+    kernel_size = 3
+    num_points = 1024
+    x = torch.rand(batch_size, in_channels + 3, num_points)
+    y = x.clone()
+    size = torch.Size([batch_size, out_channels, num_points])
+
+    for name in names:
+        cls = getattr(nn, name)
+        dconv = cls(in_channels * 2, out_channels, kernel_size)
+        assert dconv(x, y).shape == size
+
+
 def test_farthest_point_sample():
     batch_size = 1
     num_samples = 2

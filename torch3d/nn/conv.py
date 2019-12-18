@@ -6,7 +6,7 @@ from torch3d.nn.utils import _single
 
 class EdgeConv(nn.Sequential):
     """
-    The edge convolution operator from the `"Dynamic Graph CNN for Learning on Point Clouds"
+    The edge convolution layer introduced in the `"Dynamic Graph CNN for Learning on Point Clouds"
     <https://arxiv.org/abs/1801.07829>`_ paper
 
     Args:
@@ -48,7 +48,7 @@ class EdgeConv(nn.Sequential):
 
 class SetConv(nn.Sequential):
     """
-    The set abstraction operator from the `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space"
+    The set abstraction layer introduced in the `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space"
     <https://arxiv.org/abs/1706.02413>`_ paper
 
     Args:
