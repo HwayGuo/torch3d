@@ -29,3 +29,19 @@ def farthest_point_sample(p, num_samples):
     index = _C.farthest_point_sample(p.contiguous(), num_samples)
     index = index.unsqueeze(1).expand(-1, in_channels, -1)
     return torch.gather(p, 2, index)
+
+
+def interpolate(p, q, x, k):
+    batch_size = x.shape[0]
+    in_channels = x.shape[1]
+    sqdist, index = knn(p, q, k)
+    sqdist = torch.clamp(sqdist, min=1e-10)
+    weight = torch.reciprocal(sqdist)
+    weight = weight / torch.sum(weight, dim=1, keepdim=True)
+    weight = weight.unsqueeze(1)
+    index = index.view(batch_size, -1)
+    index = index.unsqueeze(1).expand(-1, in_channels, -1)
+    x = torch.gather(x, 2, index)
+    x = x.view(batch_size, in_channels, k, -1)
+    x = torch.sum(x * weight, dim=2)
+    return x

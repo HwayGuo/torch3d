@@ -80,3 +80,20 @@ def test_ball_point():
     index = F.ball_point(p, q, k, radius)
     assert index.shape == size
     assert index.tolist() == [[[0, 1, 2, 3, 4, 5, 6, 7], [0, 1, 2, 3, 4, 5, 6, 7]]]
+
+
+def test_interpolate():
+    k = 2
+    p = torch.tensor(
+        [
+            [
+                [0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0],
+                [0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0],
+                [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0],
+            ]
+        ]
+    )
+    q = p.clone()
+    x = torch.tensor([[[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]]])
+    y = F.interpolate(p, q, x, k)
+    assert torch.allclose(x, y)
