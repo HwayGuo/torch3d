@@ -1,10 +1,10 @@
 from .metric import Metric
 from .accuracy import Accuracy
-from .jaccard import Jaccard
+from .iou import IoU
 
 
 __all__ = [
     "Metric",
     "Accuracy",
-    "Jaccard",
+    "IoU",
 ]

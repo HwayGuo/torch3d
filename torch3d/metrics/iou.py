@@ -2,8 +2,8 @@ import torch
 from .metric import Metric
 
 
-class Jaccard(Metric):
-    name = "jaccard"
+class IoU(Metric):
+    name = "iou"
 
     def __init__(self, num_classes, smooth=0.0):
         self.num_classes = num_classes
