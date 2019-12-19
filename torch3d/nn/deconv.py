@@ -25,4 +25,5 @@ class SetDeconv(nn.Sequential):
         x = F.interpolate(p, q, x, self.kernel_size)
         x = torch.cat([x, y], dim=1)
         x = super(SetDeconv, self).forward(x)
+        x = torch.cat([q, x], dim=1)
         return x

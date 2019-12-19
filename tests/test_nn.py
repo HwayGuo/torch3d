@@ -33,7 +33,7 @@ def test_deconv():
     num_points = 1024
     x = torch.rand(batch_size, in_channels + 3, num_points)
     y = x.clone()
-    size = torch.Size([batch_size, out_channels, num_points])
+    size = torch.Size([batch_size, out_channels + 3, num_points])
 
     for name in names:
         cls = getattr(nn, name)
