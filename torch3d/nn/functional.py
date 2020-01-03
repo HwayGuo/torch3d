@@ -55,3 +55,8 @@ def interpolate(p, q, x, k):
     x = x.view(batch_size, in_channels, k, -1)
     x = torch.sum(x * weight, dim=2)
     return x
+
+
+def chamfer_loss(x, y):
+    sqdist = cdist(x, y)
+    return torch.mean(sqdist.min(1)[0]) + torch.mean(sqdist.min(2)[0])

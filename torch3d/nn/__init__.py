@@ -1,11 +1,11 @@
 from .conv import EdgeConv, SetConv
 from .deconv import SetDeconv
-from .folding import Folding3d
+from .loss import ChamferLoss
 
 
 __all__ = [
     "EdgeConv",
     "SetConv",
     "SetDeconv",
-    "Folding3d",
+    "ChamferLoss",
 ]
