@@ -138,7 +138,7 @@ def visualize(points, labels, predict=None):
                 if predict is not None:
                     color = "red" if predict[i] != labels[i] else "green"
                 plt.add_text(
-                    dsets.ModelNet40.categories[predict[i]],
+                    categories[predict[i]],
                     font_size=13,
                     color=color,
                     position="lower_edge",
