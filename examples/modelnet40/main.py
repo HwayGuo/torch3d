@@ -112,6 +112,7 @@ def evaluate(args, model, dataloader):
 
 def visualize(points, labels, predict=None):
     pv.set_plot_theme("document")
+    categories = dsets.ModelNet40.categories
     plt = pv.Plotter(shape=(4, 4), window_size=(800, 800))
     for row in range(4):
         for col in range(4):
@@ -127,7 +128,7 @@ def visualize(points, labels, predict=None):
                 specular_power=100.0,
             )
             plt.add_text(
-                dsets.ModelNet40.categories[labels[i]],
+                categories[labels[i]],
                 font_size=13,
                 position="upper_edge",
                 font="arial",
