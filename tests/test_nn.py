@@ -41,17 +41,6 @@ def test_deconv():
         assert dconv(x, y).shape == size
 
 
-def test_grid_sample():
-    start = 0.0
-    end = 1.0
-    steps = 2
-    grid_size = steps ** 2
-    g = F.grid_sample(start, end, steps)
-    size = torch.Size([2, steps ** 2])
-    assert g.shape == size
-    assert g.tolist() == [[0.0, 0.0, 1.0, 1.0], [0.0, 1.0, 0.0, 1.0]]
-
-
 def test_farthest_point_sample():
     batch_size = 1
     num_samples = 2
