@@ -83,8 +83,11 @@ class ShapeNetPart(VisionDataset):
             h5.close()
         self.data = np.concatenate(self.data, axis=0)
         self.labels = np.concatenate(self.labels, axis=0)
-        self.parts = np.concatenate(self.parts, axis=0).astype(np.int64)
         self.labels = np.squeeze(self.labels).astype(np.int64)
+        self.parts = np.concatenate(self.parts, axis=0).astype(np.int64)
+
+    def __len__(self):
+        return len(self.data)
 
     def __getitem__(self, i):
         pcd = self.data[i]
