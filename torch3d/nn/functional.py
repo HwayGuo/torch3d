@@ -31,6 +31,16 @@ def farthest_point_sample(p, num_samples):
     return torch.gather(p, 2, index)
 
 
+def grid_sample(start, end, steps):
+    xx = torch.linspace(start, end, steps)
+    yy = torch.linspace(start, end, steps)
+    xx, yy = torch.meshgrid(xx, yy)
+    g = torch.zeros(2, steps ** 2)
+    g[0] = xx.reshape(-1)
+    g[1] = yy.reshape(-1)
+    return g
+
+
 def interpolate(p, q, x, k):
     batch_size = x.shape[0]
     in_channels = x.shape[1]
