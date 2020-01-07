@@ -138,8 +138,16 @@ class PointConv(nn.Module):
             nn.ReLU(True),
             nn.Conv2d(8, 16, 1, bias=self.bias),
         )
-        self.conv = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, [16, 1], bias=self.bias),
+        in_channels = self.in_channels
+        modules = []
+        for channels in self.out_channels[:-1]:
+            modules.append(nn.Conv2d(in_channels, channels, 1, bias=self.bias))
+            modules.append(nn.BatchNorm2d(channels))
+            modules.append(nn.ReLU(True))
+            in_channels = channels
+        self.mlp = nn.Sequential(*modules)
+        self.lin = nn.Sequential(
+            nn.Conv2d(in_channels, self.out_channels[-1], [16, 1], bias=self.bias),
             nn.BatchNorm2d(self.out_channels[-1]),
             nn.ReLU(True),
         )
@@ -163,9 +171,9 @@ class PointConv(nn.Module):
             s = s.view(batch_size, 1, self.kernel_size, -1)
             x[:, :3] -= q.unsqueeze(2).expand(-1, -1, self.kernel_size, -1)
             w = self.weight(x[:, :3])
-            x = x * s
+            x = self.mlp(x * s)
             x = torch.matmul(w.permute(0, 3, 1, 2), x.permute(0, 3, 2, 1))
             x = x.permute(0, 3, 2, 1)
-            x = self.conv(x).squeeze(2)
+            x = self.lin(x).squeeze(2)
             x = torch.cat([q, x], dim=1)
         return x
