@@ -14,7 +14,7 @@ class EdgeConv(nn.Sequential):
         out_channels (int): Number of channels produced by the convolution
         kernel_size (int): Neighborhood size of the convolution kernel
         bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
-    """
+    """  # noqa
 
     def __init__(self, in_channels, out_channels, kernel_size, bias=True):
         self.in_channels = in_channels
@@ -58,7 +58,7 @@ class SetConv(nn.Sequential):
         stride (int, optional): Reduction rate of farthest point sampling. Default: 1
         radius (float, optional): Radius for the neighborhood search. Default: 1.0
         bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
-    """
+    """  # noqa
 
     def __init__(
         self, in_channels, out_channels, kernel_size=1, stride=1, radius=1.0, bias=True

@@ -67,7 +67,6 @@ def test_farthest_point_sample():
 
 def test_ball_point():
     batch_size = 1
-    in_channels = 3
     k = 2
     radius = 0.5
     p = torch.tensor(

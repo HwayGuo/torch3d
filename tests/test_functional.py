@@ -6,7 +6,6 @@ def test_meshgrid2d():
     start = 0.0
     end = 1.0
     steps = 2
-    grid_size = steps ** 2
     g = torch3d.meshgrid2d(start, end, steps)
     size = torch.Size([2, steps ** 2])
     assert g.shape == size
