@@ -4,6 +4,23 @@ from torch3d.nn import functional as F
 from torch3d.nn.utils import _single
 
 
+class PointConv(nn.Module):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        kernel_size=1,
+        stride=1,
+        bandwidth=1,
+        radius=None,
+        bias=True,
+    ):
+        self.in_channels = in_channels
+        self.out_channels = _single(out_channels)
+        self.kernel_size = kernel_size
+        self.bias = bias
+
+
 class EdgeConv(nn.Sequential):
     """
     The edge convolution layer introduced in the `"Dynamic Graph CNN for Learning on Point Clouds"

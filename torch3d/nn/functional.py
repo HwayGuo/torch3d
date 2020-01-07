@@ -1,3 +1,4 @@
+import math
 import torch
 import torch.nn.functional as F
 from torch3d.extension import _lazy_import
@@ -50,3 +51,11 @@ def interpolate(p, q, x, k):
 def chamfer_loss(x, y):
     sqdist = cdist(x, y)
     return torch.mean(sqdist.min(1)[0]) + torch.mean(sqdist.min(2)[0])
+
+
+def kde(p, bandwidth):
+    sqdist = cdist(p, p)
+    denom = math.sqrt(2 * math.pi) * bandwidth
+    num = torch.exp(-sqdist / (2 * bandwidth * bandwidth))
+    pdf = torch.mean(num / denom, dim=-1)
+    return pdf
