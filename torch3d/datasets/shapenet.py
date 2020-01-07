@@ -11,7 +11,7 @@ class ShapeNetPart(VisionDataset):
 
     """
 
-    name = "shapenetpart"
+    name = "ShapeNetPart"
     url = "https://shapenet.cs.stanford.edu/media/shapenet_part_seg_hdf5_data.zip"
     basedir = "hdf5_data"
     splits = {

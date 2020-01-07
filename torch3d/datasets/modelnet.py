@@ -11,7 +11,7 @@ class ModelNet40(VisionDataset):
 
     """
 
-    name = "modelnet40"
+    name = "ModelNet40"
     url = "https://shapenet.cs.stanford.edu/media/modelnet40_ply_hdf5_2048.zip"
     basedir = "modelnet40_ply_hdf5_2048"
     splits = {
