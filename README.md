@@ -31,8 +31,6 @@ $ cd torch3d
 $ pip install --editable .
 ```
 
-> **NOTE**: Some operators require CUDA.
-
 
 ## Getting started
 
@@ -46,10 +44,10 @@ Here are some examples to get you started. These examples assume that you have a
 
 Torch3d composes of the following modules:
 - **datasets**: Common 3D datasets for classification, semantic segmentation, and so on.
-  + ModelNet40 [[URL](https://modelnet.cs.princeton.edu/)]
-  + S3DIS [[URL](http://buildingparser.stanford.edu/dataset.html)]
-  + ShapeNetPart [[URL](https://cs.stanford.edu/~ericyi/project_page/part_annotation/)]
-  + SceneNN [[URL](http://scenenn.net/)]
+  + ModelNet40 [[URL](https://modelnet.cs.princeton.edu/)] (classification)
+  + S3DIS [[URL](http://buildingparser.stanford.edu/dataset.html)] (segmentation)
+  + ShapeNet [[URL](https://cs.stanford.edu/~ericyi/project_page/part_annotation/)] (segmentation)
+  + SceneNN [[URL](http://scenenn.net/)] (segmentation)
 - **metrics**: Metrics for on-the-fly training evaluation of different tasks.
   + Accuracy (classification, segmentation)
   + IoU (segmentation)
