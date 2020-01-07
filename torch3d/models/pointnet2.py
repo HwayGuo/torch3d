@@ -11,7 +11,7 @@ class PointNetSSG(nn.Module):
         self.dropout = dropout
         self.conv1 = SetConv(in_channels, [64, 64, 128], 32, 2, 0.2, bias=False)
         self.conv2 = SetConv(128 + 3, [128, 128, 256], 64, 2, 0.4, bias=False)
-        self.conv3 = SetConv(256 + 3, [256, 512, 1024], 128, 4, None, bias=False)
+        self.conv3 = SetConv(256 + 3, [256, 512, 1024], 128, None, None, bias=False)
         self.mlp = nn.Sequential(
             nn.Linear(1024, 512, bias=False),
             nn.BatchNorm1d(512),

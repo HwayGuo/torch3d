@@ -4,21 +4,26 @@ import torch3d.nn.functional as F
 
 
 def test_conv():
-    names = ["EdgeConv", "SetConv"]
+    names = ["EdgeConv", "SetConv", "PointConv"]
     batch_size = 2
     in_channels = 3
     out_channels = 64
     kernel_size = 32
     num_points = 1024
+    stride = 1
     radius = 0.1
+    bandwidth = 0.1
     x = torch.rand(batch_size, in_channels, num_points)
 
     for name in names:
         cls = getattr(nn, name)
         if name == "SetConv":
             size = torch.Size([batch_size, out_channels + 3, num_points])
-            conv = cls(in_channels, out_channels, kernel_size, radius=radius)
-        else:
+            conv = cls(in_channels, out_channels, kernel_size, stride, radius)
+        elif name == "PointConv":
+            size = torch.Size([batch_size, out_channels + 3, num_points])
+            conv = cls(in_channels, out_channels, kernel_size, stride, bandwidth)
+        elif name == "EdgeConv":
             size = torch.Size([batch_size, out_channels, num_points])
             conv = cls(in_channels, out_channels, kernel_size)
         assert conv(x).shape == size

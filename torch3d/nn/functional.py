@@ -58,4 +58,5 @@ def kde(p, bandwidth):
     denom = math.sqrt(2 * math.pi) * bandwidth
     num = torch.exp(-sqdist / (2 * bandwidth * bandwidth))
     pdf = torch.mean(num / denom, dim=-1)
+    # TODO: normalization
     return pdf

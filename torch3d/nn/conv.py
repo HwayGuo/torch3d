@@ -4,23 +4,6 @@ from torch3d.nn import functional as F
 from torch3d.nn.utils import _single
 
 
-class PointConv(nn.Module):
-    def __init__(
-        self,
-        in_channels,
-        out_channels,
-        kernel_size=1,
-        stride=1,
-        bandwidth=1,
-        radius=None,
-        bias=True,
-    ):
-        self.in_channels = in_channels
-        self.out_channels = _single(out_channels)
-        self.kernel_size = kernel_size
-        self.bias = bias
-
-
 class EdgeConv(nn.Sequential):
     """
     The edge convolution layer introduced in the `"Dynamic Graph CNN for Learning on Point Clouds"
@@ -73,18 +56,12 @@ class SetConv(nn.Sequential):
         out_channels (int): Number of channels produced by the convolution
         kernel_size (int, optional): Neighborhood size of the convolution kernel. Default: 1
         stride (int, optional): Reduction rate of farthest point sampling. Default: 1
-        radius (float, optional): Radius for the neighborhood search. Default: ``None``
+        radius (float, optional): Radius for the neighborhood search. Default: 1.0
         bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
     """
 
     def __init__(
-        self,
-        in_channels,
-        out_channels,
-        kernel_size=1,
-        stride=1,
-        radius=None,
-        bias=True,
+        self, in_channels, out_channels, kernel_size=1, stride=1, radius=1.0, bias=True
     ):
         self.in_channels = in_channels
         self.out_channels = _single(out_channels)
@@ -105,7 +82,7 @@ class SetConv(nn.Sequential):
     def forward(self, x):
         batch_size = x.shape[0]
         num_points = x.shape[2]
-        if self.radius is not None:
+        if self.stride is not None:
             num_samples = num_points // self.stride
             p = x[:, :3]  # XYZ coordinates
             q = F.farthest_point_sample(p, num_samples)
@@ -122,4 +99,73 @@ class SetConv(nn.Sequential):
             x = x.unsqueeze(3)
             x = super(SetConv, self).forward(x)
             x = x.squeeze(2)
+        return x
+
+
+class PointConv(nn.Module):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        kernel_size=1,
+        stride=1,
+        bandwidth=1.0,
+        bias=True,
+    ):
+        super(PointConv, self).__init__()
+        self.in_channels = in_channels
+        self.out_channels = _single(out_channels)
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.bandwidth = bandwidth
+        self.bias = bias
+        self.scale = nn.Sequential(
+            nn.Conv1d(1, 8, 1, bias=self.bias),
+            nn.BatchNorm1d(8),
+            nn.ReLU(True),
+            nn.Conv1d(8, 8, 1, bias=self.bias),
+            nn.BatchNorm1d(8),
+            nn.ReLU(True),
+            nn.Conv1d(8, 1, 1, bias=self.bias),
+            nn.Sigmoid(),
+        )
+        self.weight = nn.Sequential(
+            nn.Conv2d(3, 8, 1, bias=self.bias),
+            nn.BatchNorm2d(8),
+            nn.ReLU(True),
+            nn.Conv2d(8, 8, 1, bias=self.bias),
+            nn.BatchNorm2d(8),
+            nn.ReLU(True),
+            nn.Conv2d(8, 16, 1, bias=self.bias),
+        )
+        self.conv = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, [16, 1], bias=self.bias),
+            nn.BatchNorm2d(self.out_channels[-1]),
+            nn.ReLU(True),
+        )
+
+    def forward(self, x):
+        batch_size = x.shape[0]
+        num_points = x.shape[2]
+        if self.stride is not None:
+            num_samples = num_points // self.stride
+            p = x[:, :3]  # XYZ coordinates
+            s = F.kde(p, self.bandwidth).unsqueeze(1)
+            # TODO: inverse scaling
+            s = self.scale(s)  # calculate scaling factor
+            q = F.farthest_point_sample(p, num_samples)
+            _, index = F.knn(p, q, self.kernel_size)
+            index = index.view(batch_size, -1).unsqueeze(1)
+            # Point and density grouping
+            x = torch.gather(x, 2, index.expand(-1, self.in_channels, -1))
+            s = torch.gather(s, 2, index)
+            x = x.view(batch_size, self.in_channels, self.kernel_size, -1)
+            s = s.view(batch_size, 1, self.kernel_size, -1)
+            x[:, :3] -= q.unsqueeze(2).expand(-1, -1, self.kernel_size, -1)
+            w = self.weight(x[:, :3])
+            x = x * s
+            x = torch.matmul(w.permute(0, 3, 1, 2), x.permute(0, 3, 2, 1))
+            x = x.permute(0, 3, 2, 1)
+            x = self.conv(x).squeeze(2)
+            x = torch.cat([q, x], dim=1)
         return x
