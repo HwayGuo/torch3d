@@ -24,11 +24,11 @@ class EdgeConv(nn.Sequential):
         in_channels = in_channels * 2
         modules = []
         for channels in self.out_channels:
-            modules.append(nn.Conv2d(in_channels, channels, 1, bias=self.bias))
+            modules.append(nn.Conv2d(in_channels, channels, 1, bias=bias))
             modules.append(nn.BatchNorm2d(channels))
             modules.append(nn.ReLU(True))
             in_channels = channels
-        modules.append(nn.MaxPool2d([self.kernel_size, 1]))
+        modules.append(nn.MaxPool2d([kernel_size, 1]))
         super(EdgeConv, self).__init__(*modules)
 
     def forward(self, x):
@@ -72,7 +72,7 @@ class SetConv(nn.Sequential):
         in_channels = self.in_channels
         modules = []
         for channels in self.out_channels:
-            modules.append(nn.Conv2d(in_channels, channels, 1, bias=self.bias))
+            modules.append(nn.Conv2d(in_channels, channels, 1, bias=bias))
             modules.append(nn.BatchNorm2d(channels))
             modules.append(nn.ReLU(True))
             in_channels = channels
@@ -120,34 +120,34 @@ class PointConv(nn.Module):
         self.bandwidth = bandwidth
         self.bias = bias
         self.scale = nn.Sequential(
-            nn.Conv1d(1, 8, 1, bias=self.bias),
+            nn.Conv1d(1, 8, 1, bias=bias),
             nn.BatchNorm1d(8),
             nn.ReLU(True),
-            nn.Conv1d(8, 8, 1, bias=self.bias),
+            nn.Conv1d(8, 8, 1, bias=bias),
             nn.BatchNorm1d(8),
             nn.ReLU(True),
-            nn.Conv1d(8, 1, 1, bias=self.bias),
+            nn.Conv1d(8, 1, 1, bias=bias),
             nn.Sigmoid(),
         )
         self.weight = nn.Sequential(
-            nn.Conv2d(3, 8, 1, bias=self.bias),
+            nn.Conv2d(3, 8, 1, bias=bias),
             nn.BatchNorm2d(8),
             nn.ReLU(True),
-            nn.Conv2d(8, 8, 1, bias=self.bias),
+            nn.Conv2d(8, 8, 1, bias=bias),
             nn.BatchNorm2d(8),
             nn.ReLU(True),
-            nn.Conv2d(8, 16, 1, bias=self.bias),
+            nn.Conv2d(8, 16, 1, bias=bias),
         )
         in_channels = self.in_channels
         modules = []
         for channels in self.out_channels[:-1]:
-            modules.append(nn.Conv2d(in_channels, channels, 1, bias=self.bias))
+            modules.append(nn.Conv2d(in_channels, channels, 1, bias=bias))
             modules.append(nn.BatchNorm2d(channels))
             modules.append(nn.ReLU(True))
             in_channels = channels
         self.mlp = nn.Sequential(*modules)
         self.lin = nn.Sequential(
-            nn.Conv2d(in_channels, self.out_channels[-1], [16, 1], bias=self.bias),
+            nn.Conv2d(in_channels, self.out_channels[-1], [16, 1], bias=bias),
             nn.BatchNorm2d(self.out_channels[-1]),
             nn.ReLU(True),
         )
@@ -176,4 +176,14 @@ class PointConv(nn.Module):
             x = x.permute(0, 3, 2, 1)
             x = self.lin(x).squeeze(2)
             x = torch.cat([q, x], dim=1)
+        else:
+            p = x[:, :3]
+            s = F.kde(p, self.bandwidth).unsqueeze(1)
+            s = self.scale(s).unsqueeze(3)
+            x = x.unsqueeze(3)
+            w = self.weight(x[:, :3])
+            x = self.mlp(x * s)
+            x = torch.matmul(w.permute(0, 3, 1, 2), x.permute(0, 3, 2, 1))
+            x = x.permute(0, 3, 2, 1)
+            x = self.lin(x).squeeze(2)
         return x
