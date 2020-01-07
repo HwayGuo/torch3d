@@ -3,9 +3,9 @@ import torch.nn as nn
 from torch3d.nn import PointConv
 
 
-class PointConvNet(nn.Module):
+class PointConvNN(nn.Module):
     def __init__(self, in_channels, num_classes, dropout=0.5):
-        super(PointConvNet, self).__init__()
+        super(PointConvNN, self).__init__()
         self.in_channels = in_channels
         self.num_classes = num_classes
         self.dropout = dropout
