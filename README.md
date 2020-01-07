@@ -45,9 +45,9 @@ Here are some examples to get you started. These examples assume that you have a
 Torch3d composes of the following modules:
 - **datasets**: Common 3D datasets for classification, semantic segmentation, and so on.
   + ModelNet40 [[URL](https://modelnet.cs.princeton.edu/)] (classification)
-  + S3DIS [[URL](http://buildingparser.stanford.edu/dataset.html)] (segmentation)
-  + ShapeNet [[URL](https://cs.stanford.edu/~ericyi/project_page/part_annotation/)] (segmentation)
-  + SceneNN [[URL](http://scenenn.net/)] (segmentation)
+  + S3DIS [[URL](http://buildingparser.stanford.edu/dataset.html)] (semantic segmentation)
+  + ShapeNet [[URL](https://cs.stanford.edu/~ericyi/project_page/part_annotation/)] (part segmentation)
+  + SceneNN [[URL](http://scenenn.net/)] (semantic segmentation)
 - **metrics**: Metrics for on-the-fly training evaluation of different tasks.
   + Accuracy (classification, segmentation)
   + IoU (segmentation)
@@ -56,5 +56,6 @@ Torch3d composes of the following modules:
   + PoinNet++ from Qi et al. (NeurIPS 2017) [[Paper](https://arxiv.org/abs/1706.02413)]
   + DGCNN from Wang et al. (ToG 2019) [[Paper](https://arxiv.org/abs/1801.07829)]
   + FoldingNet from Yang et al. (CVPR 2018) [[Paper](https://arxiv.org/abs/1712.07262)]
+  + PointConv from Wu et al. (CVPR 2019) [[Paper](https://arxiv.org/abs/1811.07246)]
 - **nn**: Low-level operators that can be used to build up complex 3D neural networks.
 - **transforms**: Common transformations for dataset preprocessing.
