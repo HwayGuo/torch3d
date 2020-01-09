@@ -1,5 +1,6 @@
 import tqdm
 import argparse
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -119,16 +120,14 @@ def main(args):
     optimizer = optim.Adam(model.parameters(), args.lr)
     criteria = ChamferLoss()
 
-    # Showing random samples
     points, _ = next(iter(dataloaders["test"]))
     points = points.transpose(2, 1).numpy()
-    visualize(points)
 
     # Here comes the training loop
     for epoch in range(args.epochs):
         train_epoch(args, epoch, model, dataloaders["train"], optimizer, criteria)
     predict = evaluate(args, model, dataloaders["test"])
-    visualize(predict[0])
+    visualize(points, predict[0])
 
 
 def train_epoch(args, epoch, model, dataloader, optimizer, criteria):
@@ -167,22 +166,32 @@ def evaluate(args, model, dataloader):
     return predict
 
 
-def visualize(points, predict=None):
+def visualize(points, predict):
     pv.set_plot_theme("document")
-    plt = pv.Plotter(shape=(4, 4), window_size=(800, 800))
-    for row in range(4):
-        for col in range(4):
-            i = row * 4 + col
-            plt.subplot(row, col)
-            plt.add_mesh(
-                points[i],
-                render_points_as_spheres=True,
-                point_size=8.0,
-                ambient=0.1,
-                diffuse=0.8,
-                specular=0.5,
-                specular_power=100.0,
-            )
+    plt = pv.Plotter(shape=(4, 2), window_size=(400, 800))
+    for i in range(4):
+        plt.subplot(i, 0)
+        plt.add_mesh(
+            points[i],
+            render_points_as_spheres=True,
+            point_size=8.0,
+            ambient=0.1,
+            diffuse=0.8,
+            specular=0.5,
+            specular_power=100.0,
+        )
+        plt.subplot(i, 1)
+        mesh = pv.PolyData(predict[i])
+        mesh["colors"] = np.arange(predict[i].shape[0])
+        plt.add_mesh(
+            mesh,
+            render_points_as_spheres=True,
+            point_size=8.0,
+            ambient=0.1,
+            diffuse=0.8,
+            specular=0.5,
+            specular_power=100.0,
+        )
     plt.link_views()
     plt.camera_position = [
         (5.0, 0.0, 0.0),
