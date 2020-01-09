@@ -79,7 +79,7 @@ class PointDeconv(nn.Module):
         x = F.interpolate(p, q, x, self.kernel_size)
         x = torch.cat([x, y], dim=1)
         s = F.kernel_density(q, self.bandwidth).unsqueeze(1)
-        s = self.scale(1 - s)  # calculate scaling factor
+        s = self.scale(torch.reciprocal(s))  # calculate scaling factor
         _, index = F.knn(q, q, self.kernel_size)
         index = index.view(batch_size, -1).unsqueeze(1)
         # Point and density grouping

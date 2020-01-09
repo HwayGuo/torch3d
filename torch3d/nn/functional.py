@@ -56,7 +56,7 @@ def chamfer_loss(x, y):
 def kernel_density(p, bandwidth, kernel="gaussian"):
     sqdist = cdist(p, p)
     var = bandwidth ** 2
-    log_scale = math.log(bandwidth)
-    log_prob = -sqdist / (2 * var) - log_scale - math.log(math.sqrt(2 * math.pi))
-    log_prob = torch.sum(log_prob, dim=2)
-    return log_prob
+    scale = bandwidth * math.sqrt(2 * math.pi)
+    prob = torch.exp(-sqdist / (2 * var)) / scale
+    density = torch.sum(prob, dim=2)
+    return density
