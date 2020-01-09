@@ -159,7 +159,7 @@ class PointConv(nn.Module):
             num_samples = num_points // self.stride
             p = x[:, :3]  # XYZ coordinates
             s = F.kernel_density(p, self.bandwidth).unsqueeze(1)
-            s = self.scale(torch.reciprocal(s))  # calculate scaling factor
+            s = self.scale(1 - s)  # calculate scaling factor
             q = F.farthest_point_sample(p, num_samples)
             _, index = F.knn(p, q, self.kernel_size)
             index = index.view(batch_size, -1).unsqueeze(1)

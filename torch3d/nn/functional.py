@@ -58,5 +58,5 @@ def kernel_density(p, bandwidth, kernel="gaussian"):
     var = bandwidth ** 2
     log_scale = math.log(bandwidth)
     log_prob = -sqdist / (2 * var) - log_scale - math.log(math.sqrt(2 * math.pi))
-    log_prob = torch.sum(log_prob, dim=1)
-    return torch.exp(log_prob)
+    log_prob = torch.sum(log_prob, dim=2)
+    return log_prob
