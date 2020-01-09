@@ -53,10 +53,10 @@ def chamfer_loss(x, y):
     return torch.mean(sqdist.min(1)[0]) + torch.mean(sqdist.min(2)[0])
 
 
-def kde(p, bandwidth):
+def kernel_density(p, bandwidth, kernel="gaussian"):
     sqdist = cdist(p, p)
-    denom = math.sqrt(2 * math.pi) * bandwidth
-    num = torch.exp(-sqdist / (2 * bandwidth * bandwidth))
-    pdf = torch.mean(num / denom, dim=-1)
-    # TODO: normalization
-    return pdf
+    var = bandwidth ** 2
+    log_scale = math.log(bandwidth)
+    log_prob = -sqdist / (2 * var) - log_scale - math.log(math.sqrt(2 * math.pi))
+    log_prob = torch.sum(log_prob, dim=1)
+    return torch.exp(log_prob)

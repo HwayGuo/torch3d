@@ -1,5 +1,5 @@
 from .conv import EdgeConv, SetConv, PointConv
-from .deconv import SetDeconv
+from .deconv import SetDeconv, PointDeconv
 from .loss import ChamferLoss
 
 
@@ -8,5 +8,6 @@ __all__ = [
     "SetConv",
     "PointConv",
     "SetDeconv",
+    "PointDeconv",
     "ChamferLoss",
 ]

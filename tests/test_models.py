@@ -19,7 +19,7 @@ def test_classification():
 
 
 def test_segmentation():
-    names = ["PointNet", "PointNetSSG", "DGCNN"]
+    names = ["PointNet", "PointNetSSG", "DGCNN", "PointConvNN"]
     batch_size = 2
     in_channels = 3
     num_points = 4096

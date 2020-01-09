@@ -24,7 +24,7 @@ class EdgeConv(nn.Sequential):
         in_channels = in_channels * 2
         modules = []
         for channels in self.out_channels:
-            modules.append(nn.Conv2d(in_channels, channels, 1, bias=bias))
+            modules.append(nn.Conv2d(in_channels, channels, 1, bias=self.bias))
             modules.append(nn.BatchNorm2d(channels))
             modules.append(nn.ReLU(True))
             in_channels = channels
@@ -72,7 +72,7 @@ class SetConv(nn.Sequential):
         in_channels = self.in_channels
         modules = []
         for channels in self.out_channels:
-            modules.append(nn.Conv2d(in_channels, channels, 1, bias=bias))
+            modules.append(nn.Conv2d(in_channels, channels, 1, bias=self.bias))
             modules.append(nn.BatchNorm2d(channels))
             modules.append(nn.ReLU(True))
             in_channels = channels
@@ -120,34 +120,34 @@ class PointConv(nn.Module):
         self.bandwidth = bandwidth
         self.bias = bias
         self.scale = nn.Sequential(
-            nn.Conv1d(1, 8, 1, bias=bias),
+            nn.Conv1d(1, 8, 1, bias=self.bias),
             nn.BatchNorm1d(8),
             nn.ReLU(True),
-            nn.Conv1d(8, 8, 1, bias=bias),
+            nn.Conv1d(8, 8, 1, bias=self.bias),
             nn.BatchNorm1d(8),
             nn.ReLU(True),
-            nn.Conv1d(8, 1, 1, bias=bias),
+            nn.Conv1d(8, 1, 1, bias=self.bias),
             nn.Sigmoid(),
         )
         self.weight = nn.Sequential(
-            nn.Conv2d(3, 8, 1, bias=bias),
+            nn.Conv2d(3, 8, 1, bias=self.bias),
             nn.BatchNorm2d(8),
             nn.ReLU(True),
-            nn.Conv2d(8, 8, 1, bias=bias),
+            nn.Conv2d(8, 8, 1, bias=self.bias),
             nn.BatchNorm2d(8),
             nn.ReLU(True),
-            nn.Conv2d(8, 16, 1, bias=bias),
+            nn.Conv2d(8, 16, 1, bias=self.bias),
         )
         in_channels = self.in_channels
         modules = []
         for channels in self.out_channels[:-1]:
-            modules.append(nn.Conv2d(in_channels, channels, 1, bias=bias))
+            modules.append(nn.Conv2d(in_channels, channels, 1, bias=self.bias))
             modules.append(nn.BatchNorm2d(channels))
             modules.append(nn.ReLU(True))
             in_channels = channels
         self.mlp = nn.Sequential(*modules)
         self.lin = nn.Sequential(
-            nn.Conv2d(in_channels, self.out_channels[-1], [16, 1], bias=bias),
+            nn.Conv2d(in_channels, self.out_channels[-1], [16, 1], bias=self.bias),
             nn.BatchNorm2d(self.out_channels[-1]),
             nn.ReLU(True),
         )
@@ -158,9 +158,8 @@ class PointConv(nn.Module):
         if self.stride is not None:
             num_samples = num_points // self.stride
             p = x[:, :3]  # XYZ coordinates
-            s = F.kde(p, self.bandwidth).unsqueeze(1)
-            # TODO: inverse scaling
-            s = self.scale(s)  # calculate scaling factor
+            s = F.kernel_density(p, self.bandwidth).unsqueeze(1)
+            s = self.scale(torch.reciprocal(s))  # calculate scaling factor
             q = F.farthest_point_sample(p, num_samples)
             _, index = F.knn(p, q, self.kernel_size)
             index = index.view(batch_size, -1).unsqueeze(1)
@@ -178,8 +177,8 @@ class PointConv(nn.Module):
             x = torch.cat([q, x], dim=1)
         else:
             p = x[:, :3]
-            s = F.kde(p, self.bandwidth).unsqueeze(1)
-            s = self.scale(s).unsqueeze(3)
+            s = F.kernel_density(p, self.bandwidth).unsqueeze(1)
+            s = self.scale(torch.reciprocal(s)).unsqueeze(3)
             x = x.unsqueeze(3)
             w = self.weight(x[:, :3])
             x = self.mlp(x * s)
