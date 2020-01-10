@@ -5,7 +5,18 @@ from torch3d.nn.utils import _single
 
 
 class SetDeconv(nn.Sequential):
-    def __init__(self, in_channels, out_channels, kernel_size, bias=True):
+    """
+    The feature propagation layer introduced in the `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space"
+    <https://arxiv.org/abs/1706.02413>`_ paper.
+
+    Args:
+        in_channels (int): Number of channels in the input point set
+        out_channels (int): Number of channels produced by the convolution
+        kernel_size (int, optional): Neighborhood size of the convolution kernel. Default: 1
+        bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
+    """  # noqa
+
+    def __init__(self, in_channels, out_channels, kernel_size=1, bias=True):
         self.in_channels = in_channels
         self.out_channels = _single(out_channels)
         self.kernel_size = kernel_size
@@ -30,6 +41,18 @@ class SetDeconv(nn.Sequential):
 
 
 class PointDeconv(nn.Module):
+    """
+    The point deconvolution layer introduced in the `"PointConv: Deep Convolutional Networks on 3D Point Clouds"
+    <https://arxiv.org/abs/1811.07246>`_ paper.
+
+    Args:
+        in_channels (int): Number of channels in the input point set
+        out_channels (int): Number of channels produced by the convolution
+        kernel_size (int, optional): Neighborhood size of the convolution kernel. Default: 1
+        bandwidth (float, optional): Bandwidth of kernel density estimation. Default: 1.0
+        bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
+    """  # noqa
+
     def __init__(
         self, in_channels, out_channels, kernel_size=1, bandwidth=1.0, bias=True
     ):

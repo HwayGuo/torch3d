@@ -7,7 +7,7 @@ from torch3d.nn.utils import _single
 class EdgeConv(nn.Sequential):
     """
     The edge convolution layer introduced in the `"Dynamic Graph CNN for Learning on Point Clouds"
-    <https://arxiv.org/abs/1801.07829>`_ paper
+    <https://arxiv.org/abs/1801.07829>`_ paper.
 
     Args:
         in_channels (int): Number of channels in the input point set
@@ -49,7 +49,7 @@ class EdgeConv(nn.Sequential):
 class SetConv(nn.Sequential):
     """
     The set abstraction layer introduced in the `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space"
-    <https://arxiv.org/abs/1706.02413>`_ paper
+    <https://arxiv.org/abs/1706.02413>`_ paper.
 
     Args:
         in_channels (int): Number of channels in the input point set
@@ -103,6 +103,19 @@ class SetConv(nn.Sequential):
 
 
 class PointConv(nn.Module):
+    """
+    The point convolution layer introduced in the `"PointConv: Deep Convolutional Networks on 3D Point Clouds"
+    <https://arxiv.org/abs/1811.07246>`_ paper.
+
+    Args:
+        in_channels (int): Number of channels in the input point set
+        out_channels (int): Number of channels produced by the convolution
+        kernel_size (int, optional): Neighborhood size of the convolution kernel. Default: 1
+        stride (int, optional): Reduction rate of farthest point sampling. Default: 1
+        bandwidth (float, optional): Bandwidth of kernel density estimation. Default: 1.0
+        bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
+    """  # noqa
+
     def __init__(
         self,
         in_channels,
