@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch3d.nn import SetConv, SetDeconv
+from torch3d.nn import SetConv, SetConvTranspose
 
 
 class PointNetSSG(nn.Module):
@@ -13,10 +13,10 @@ class PointNetSSG(nn.Module):
         self.conv2 = SetConv(64 + 3, [64, 64, 128], 32, 4, 0.2, bias=False)
         self.conv3 = SetConv(128 + 3, [128, 128, 256], 32, 4, 0.4, bias=False)
         self.conv4 = SetConv(256 + 3, [256, 256, 512], 32, 4, 0.8, bias=False)
-        self.dconv1 = SetDeconv(512 + 256, [256, 256], 3, bias=False)
-        self.dconv2 = SetDeconv(256 + 128, [256, 256], 3, bias=False)
-        self.dconv3 = SetDeconv(256 + 64, [256, 128], 3, bias=False)
-        self.dconv4 = SetDeconv(128, [128, 128], 3, bias=False)
+        self.dconv1 = SetConvTranspose(512 + 256, [256, 256], 3, bias=False)
+        self.dconv2 = SetConvTranspose(256 + 128, [256, 256], 3, bias=False)
+        self.dconv3 = SetConvTranspose(256 + 64, [256, 128], 3, bias=False)
+        self.dconv4 = SetConvTranspose(128, [128, 128], 3, bias=False)
         self.mlp = nn.Sequential(
             nn.Conv1d(128, 128, 1, bias=False),
             nn.BatchNorm1d(128),

@@ -30,7 +30,7 @@ def test_conv():
 
 
 def test_deconv():
-    names = ["SetDeconv", "PointDeconv"]
+    names = ["SetConvTranspose", "PointConvTranspose"]
     batch_size = 2
     in_channels = 32
     out_channels = 64
@@ -43,9 +43,9 @@ def test_deconv():
 
     for name in names:
         cls = getattr(nn, name)
-        if name == "SetDeconv":
+        if name == "SetConvTranspose":
             dconv = cls(in_channels * 2, out_channels, kernel_size)
-        elif name == "PointDeconv":
+        elif name == "PointConvTranspose":
             dconv = cls(in_channels * 2, out_channels, kernel_size, bandwidth)
         assert dconv(x, y).shape == size
 

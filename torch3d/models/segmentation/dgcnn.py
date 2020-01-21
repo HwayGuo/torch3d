@@ -15,20 +15,20 @@ class DGCNN(nn.Module):
         self.conv4 = nn.Sequential(
             nn.Conv1d(192, 1024, 1, bias=False),
             nn.BatchNorm1d(1024),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(0.2, True),
         )
         self.maxpool = nn.AdaptiveMaxPool1d(1)
         self.mlp = nn.Sequential(
             nn.Conv1d(1216, 512, 1, bias=False),
             nn.BatchNorm1d(512),
-            nn.ReLU(True),
+            nn.LeakyReLU(0.2, True),
             nn.Conv1d(512, 256, 1, bias=False),
             nn.BatchNorm1d(256),
-            nn.ReLU(True),
+            nn.LeakyReLU(0.2, True),
             nn.Dropout(dropout),
             nn.Conv1d(256, 128, 1, bias=False),
             nn.BatchNorm1d(128),
-            nn.ReLU(True),
+            nn.LeakyReLU(0.2, True),
             nn.Dropout(dropout),
         )
         self.fc = nn.Conv1d(128, num_classes, 1)

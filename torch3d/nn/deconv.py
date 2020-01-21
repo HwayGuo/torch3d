@@ -4,10 +4,10 @@ from torch3d.nn import functional as F
 from torch3d.nn.utils import _single
 
 
-class SetDeconv(nn.Sequential):
+class SetConvTranspose(nn.Sequential):
     """
-    The feature propagation layer introduced in the `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space"
-    <https://arxiv.org/abs/1706.02413>`_ paper.
+    The feature propagation from the
+    `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space" <https://arxiv.org/abs/1706.02413>`_ paper.
 
     Args:
         in_channels (int): Number of channels in the input point set
@@ -20,30 +20,29 @@ class SetDeconv(nn.Sequential):
         self.in_channels = in_channels
         self.out_channels = _single(out_channels)
         self.kernel_size = kernel_size
-        self.bias = bias
         in_channels = self.in_channels
         modules = []
         for channels in self.out_channels:
-            modules.append(nn.Conv1d(in_channels, channels, 1, bias=self.bias))
+            modules.append(nn.Conv1d(in_channels, channels, 1, bias=bias))
             modules.append(nn.BatchNorm1d(channels))
             modules.append(nn.ReLU(True))
             in_channels = channels
-        super(SetDeconv, self).__init__(*modules)
+        super(SetConvTranspose, self).__init__(*modules)
 
     def forward(self, x, y):
         p, x = x[:, :3], x[:, 3:]
         q, y = y[:, :3], y[:, 3:]
         x = F.interpolate(p, q, x, self.kernel_size)
         x = torch.cat([x, y], dim=1)
-        x = super(SetDeconv, self).forward(x)
+        x = super(SetConvTranspose, self).forward(x)
         x = torch.cat([q, x], dim=1)
         return x
 
 
-class PointDeconv(nn.Module):
+class PointConvTranspose(nn.Module):
     """
-    The point deconvolution layer introduced in the `"PointConv: Deep Convolutional Networks on 3D Point Clouds"
-    <https://arxiv.org/abs/1811.07246>`_ paper.
+    The point deconvolution layer from the
+    `"PointConv: Deep Convolutional Networks on 3D Point Clouds" <https://arxiv.org/abs/1811.07246>`_ paper.
 
     Args:
         in_channels (int): Number of channels in the input point set
@@ -56,7 +55,7 @@ class PointDeconv(nn.Module):
     def __init__(
         self, in_channels, out_channels, kernel_size=1, bandwidth=1.0, bias=True
     ):
-        super(PointDeconv, self).__init__()
+        super(PointConvTranspose, self).__init__()
         self.in_channels = in_channels
         self.out_channels = _single(out_channels)
         self.kernel_size = kernel_size
