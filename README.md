@@ -36,8 +36,7 @@ $ pip install --editable .
 
 Here are some examples to get you started. These examples assume that you have a basic understanding of PyTorch.
 - [Point cloud classification (ModelNet40) using PointNet](examples/modelnet40) (Beginner)
-
-> Take a look at [SotA3d](https://github.com/pqhieu/sota3d) to see how Torch3d is being used in practice.
+- [Point cloud auto-encoder with FoldingNet](examples/foldingnet) (Beginner)
 
 
 ## Modules
