@@ -4,7 +4,7 @@ import torch3d.nn.functional as F
 
 
 def test_conv():
-    names = ["EdgeConv", "SetConv", "PointConv"]
+    names = ["EdgeConv", "SetConv", "PointConv", "XConv"]
     batch_size = 2
     in_channels = 3
     out_channels = 64

@@ -1,3 +1,4 @@
+import math
 import torch
 import torch.nn as nn
 from torch3d.nn import functional as F
@@ -195,4 +196,80 @@ class PointConv(nn.Module):
             x = torch.matmul(w.permute(0, 3, 1, 2), x.permute(0, 3, 2, 1))
             x = x.permute(0, 3, 2, 1)
             x = self.lin(x).squeeze(2)
+        return x
+
+
+class XConv(nn.Module):
+    """
+    The Χ-convolution layer from the
+    `"PointCNN: Convolution On X-Transformed Points" <https://arxiv.org/abs/1801.07791>`_ paper.
+
+    Args:
+        in_channels (int): Number of channels in the input point set
+        out_channels (int): Number of channels produced by the convolution
+        kernel_size (int, optional): Neighborhood size of the convolution kernel. Default: 1
+        stride (int, optional): Reduction rate of farthest point sampling. Default: 1
+        dilation (int, optional): Controls the sampling rate between kernel points. Default: 1
+        bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
+    """  # noqa
+
+    def __init__(
+        self, in_channels, out_channels, kernel_size=1, stride=1, dilation=1, bias=True
+    ):
+        super(XConv, self).__init__()
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.dilation = dilation
+        mid_channels = out_channels // 4
+        self.mlp = nn.Sequential(
+            nn.Conv2d(3, mid_channels, 1, bias=bias),
+            nn.BatchNorm2d(mid_channels),
+            nn.ELU(inplace=True),
+            nn.Conv2d(mid_channels, mid_channels, 1, bias=bias),
+            nn.BatchNorm2d(mid_channels),
+            nn.ELU(inplace=True),
+        )
+        self.stn = nn.Sequential(
+            nn.Conv2d(3, kernel_size ** 2, [kernel_size, 1], bias=bias),
+            nn.BatchNorm2d(kernel_size ** 2),
+            nn.ELU(inplace=True),
+            nn.Conv2d(kernel_size ** 2, kernel_size ** 2, 1, bias=bias),
+            nn.BatchNorm2d(kernel_size ** 2),
+            nn.ELU(inplace=True),
+            nn.Conv2d(kernel_size ** 2, kernel_size ** 2, 1, bias=bias),
+            nn.BatchNorm2d(kernel_size ** 2),
+        )
+        in_channels = in_channels + mid_channels
+        dm = int(math.ceil(out_channels / in_channels))
+        self.conv = nn.Sequential(
+            nn.Conv2d(
+                in_channels, in_channels * dm, [kernel_size, 1], groups=in_channels
+            ),
+            nn.Conv2d(in_channels * dm, out_channels, 1, bias=bias),
+            nn.BatchNorm2d(out_channels),
+            nn.ELU(inplace=True),
+        )
+
+    def forward(self, x):
+        batch_size = x.shape[0]
+        in_channels = x.shape[1]
+        num_points = x.shape[2]
+        num_samples = num_points // self.stride
+        p = x[:, :3]  # XYZ coordinates
+        q = F.farthest_point_sample(p, num_samples)
+        _, index = F.knn(p, q, self.kernel_size * self.dilation)
+        index = index[:, :: self.dilation]
+        index = index.reshape(batch_size, -1).unsqueeze(1)
+        p_hat = torch.gather(p, 2, index.expand(-1, 3, -1))
+        p_hat = p_hat.view(batch_size, 3, self.kernel_size, -1)
+        p_hat = p_hat - q.unsqueeze(2).expand(-1, -1, self.kernel_size, -1)
+        T = self.stn(p_hat).view(batch_size, self.kernel_size, self.kernel_size, -1)
+        x = torch.gather(x, 2, index.expand(-1, in_channels, -1))
+        x = x.view(batch_size, in_channels, self.kernel_size, -1)
+        x_hat = self.mlp(p_hat)
+        x_hat = torch.cat([x_hat, x], 1)
+        x = torch.matmul(x_hat.permute(0, 3, 1, 2), T.permute(0, 3, 1, 2))
+        x = x.permute(0, 2, 3, 1)
+        x = self.conv(x).squeeze(2)
+        x = torch.cat([q, x], dim=1)
         return x
