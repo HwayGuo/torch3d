@@ -16,9 +16,6 @@ class DGCNN(nn.Module):
 
     def __init__(self, in_channels, num_classes, dropout=0.5):
         super(DGCNN, self).__init__()
-        self.in_channels = in_channels
-        self.num_classes = num_classes
-        self.dropout = dropout
         self.conv1 = EdgeConv(in_channels, 64, 20, bias=False)
         self.conv2 = EdgeConv(64, 64, 20, bias=False)
         self.conv3 = EdgeConv(64, 128, 20, bias=False)

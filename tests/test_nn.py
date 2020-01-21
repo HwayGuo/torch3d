@@ -10,7 +10,7 @@ def test_conv():
     out_channels = 64
     kernel_size = 32
     num_points = 1024
-    stride = 1
+    num_samples = 256
     radius = 0.1
     bandwidth = 0.1
     x = torch.rand(batch_size, in_channels, num_points)
@@ -18,11 +18,11 @@ def test_conv():
     for name in names:
         cls = getattr(nn, name)
         if name == "SetConv":
-            size = torch.Size([batch_size, out_channels + 3, num_points])
-            conv = cls(in_channels, out_channels, kernel_size, stride, radius)
+            size = torch.Size([batch_size, out_channels + 3, num_samples])
+            conv = cls(in_channels, out_channels, num_samples, kernel_size, radius)
         elif name == "PointConv":
-            size = torch.Size([batch_size, out_channels + 3, num_points])
-            conv = cls(in_channels, out_channels, kernel_size, stride, bandwidth)
+            size = torch.Size([batch_size, out_channels + 3, num_samples])
+            conv = cls(in_channels, out_channels, num_samples, kernel_size, bandwidth)
         elif name == "EdgeConv":
             size = torch.Size([batch_size, out_channels, num_points])
             conv = cls(in_channels, out_channels, kernel_size)

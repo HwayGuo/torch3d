@@ -54,23 +54,27 @@ class SetConv(nn.Sequential):
     Args:
         in_channels (int): Number of channels in the input point set
         out_channels (int): Number of channels produced by the convolution
+        num_samples (int, optional): Number of samples when perform downsampling. Default: 1
         kernel_size (int, optional): Neighborhood size of the convolution kernel. Default: 1
-        stride (int, optional): Reduction rate of farthest point sampling. Default: 1
         radius (float, optional): Radius for the neighborhood search. Default: 1.0
         bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
     """  # noqa
 
     def __init__(
-        self, in_channels, out_channels, kernel_size=1, stride=1, radius=1.0, bias=True
+        self,
+        in_channels,
+        out_channels,
+        num_samples=1,
+        kernel_size=1,
+        radius=1.0,
+        bias=True,
     ):
-        self.in_channels = in_channels
-        self.out_channels = _single(out_channels)
         self.kernel_size = kernel_size
-        self.stride = stride
+        self.num_samples = num_samples
         self.radius = radius
-        in_channels = self.in_channels
+        out_channels = _single(out_channels)
         modules = []
-        for channels in self.out_channels:
+        for channels in out_channels:
             modules.append(nn.Conv2d(in_channels, channels, 1, bias=bias))
             modules.append(nn.BatchNorm2d(channels))
             modules.append(nn.ReLU(True))
@@ -80,16 +84,16 @@ class SetConv(nn.Sequential):
 
     def forward(self, x):
         batch_size = x.shape[0]
+        in_channels = x.shape[1]
         num_points = x.shape[2]
-        if self.stride is not None:
-            num_samples = num_points // self.stride
+        if self.num_samples > 1:
             p = x[:, :3]  # XYZ coordinates
-            q = F.farthest_point_sample(p, num_samples)
+            q = F.farthest_point_sample(p, self.num_samples)
             index = F.ball_point(p, q, self.kernel_size, self.radius)
             index = index.view(batch_size, -1)
-            index = index.unsqueeze(1).expand(-1, self.in_channels, -1)
+            index = index.unsqueeze(1).expand(-1, in_channels, -1)
             x = torch.gather(x, 2, index)
-            x = x.view(batch_size, self.in_channels, self.kernel_size, -1)
+            x = x.view(batch_size, in_channels, self.kernel_size, -1)
             x[:, :3] -= q.unsqueeze(2).expand(-1, -1, self.kernel_size, -1)
             x = super(SetConv, self).forward(x)
             x = x.squeeze(2)
@@ -109,8 +113,8 @@ class PointConv(nn.Module):
     Args:
         in_channels (int): Number of channels in the input point set
         out_channels (int): Number of channels produced by the convolution
+        num_samples (int, optional): Number of samples when perform downsampling. Default: 1
         kernel_size (int, optional): Neighborhood size of the convolution kernel. Default: 1
-        stride (int, optional): Reduction rate of farthest point sampling. Default: 1
         bandwidth (float, optional): Bandwidth of kernel density estimation. Default: 1.0
         bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
     """  # noqa
@@ -119,16 +123,14 @@ class PointConv(nn.Module):
         self,
         in_channels,
         out_channels,
+        num_samples=1,
         kernel_size=1,
-        stride=1,
         bandwidth=1.0,
         bias=True,
     ):
         super(PointConv, self).__init__()
-        self.in_channels = in_channels
-        self.out_channels = _single(out_channels)
         self.kernel_size = kernel_size
-        self.stride = stride
+        self.num_samples = num_samples
         self.bandwidth = bandwidth
         self.scale = nn.Sequential(
             nn.Conv1d(1, 8, 1, bias=bias),
@@ -149,35 +151,35 @@ class PointConv(nn.Module):
             nn.ReLU(True),
             nn.Conv2d(8, 16, 1, bias=bias),
         )
-        in_channels = self.in_channels
         modules = []
-        for channels in self.out_channels[:-1]:
+        out_channels = _single(out_channels)
+        for channels in out_channels[:-1]:
             modules.append(nn.Conv2d(in_channels, channels, 1, bias=bias))
             modules.append(nn.BatchNorm2d(channels))
             modules.append(nn.ReLU(True))
             in_channels = channels
         self.mlp = nn.Sequential(*modules)
         self.lin = nn.Sequential(
-            nn.Conv2d(in_channels, self.out_channels[-1], [16, 1], bias=bias),
-            nn.BatchNorm2d(self.out_channels[-1]),
+            nn.Conv2d(in_channels, out_channels[-1], [16, 1], bias=bias),
+            nn.BatchNorm2d(out_channels[-1]),
             nn.ReLU(True),
         )
 
     def forward(self, x):
         batch_size = x.shape[0]
+        in_channels = x.shape[1]
         num_points = x.shape[2]
-        if self.stride is not None:
-            num_samples = num_points // self.stride
+        if self.num_samples > 1:
             p = x[:, :3]  # XYZ coordinates
             s = F.kernel_density(p, self.bandwidth).unsqueeze(1)
             s = self.scale(torch.reciprocal(s))  # calculate scaling factor
-            q = F.farthest_point_sample(p, num_samples)
+            q = F.farthest_point_sample(p, self.num_samples)
             _, index = F.knn(p, q, self.kernel_size)
             index = index.view(batch_size, -1).unsqueeze(1)
             # Point and density grouping
-            x = torch.gather(x, 2, index.expand(-1, self.in_channels, -1))
+            x = torch.gather(x, 2, index.expand(-1, in_channels, -1))
             s = torch.gather(s, 2, index)
-            x = x.view(batch_size, self.in_channels, self.kernel_size, -1)
+            x = x.view(batch_size, in_channels, self.kernel_size, -1)
             s = s.view(batch_size, 1, self.kernel_size, -1)
             x[:, :3] -= q.unsqueeze(2).expand(-1, -1, self.kernel_size, -1)
             w = self.weight(x[:, :3])
@@ -207,18 +209,24 @@ class XConv(nn.Module):
     Args:
         in_channels (int): Number of channels in the input point set
         out_channels (int): Number of channels produced by the convolution
+        num_samples (int, optional): Number of samples when perform downsampling. Default: 1
         kernel_size (int, optional): Neighborhood size of the convolution kernel. Default: 1
-        stride (int, optional): Reduction rate of farthest point sampling. Default: 1
         dilation (int, optional): Controls the sampling rate between kernel points. Default: 1
         bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
     """  # noqa
 
     def __init__(
-        self, in_channels, out_channels, kernel_size=1, stride=1, dilation=1, bias=True
+        self,
+        in_channels,
+        out_channels,
+        num_samples=1,
+        kernel_size=1,
+        dilation=1,
+        bias=True,
     ):
         super(XConv, self).__init__()
         self.kernel_size = kernel_size
-        self.stride = stride
+        self.num_samples = num_samples
         self.dilation = dilation
         mid_channels = out_channels // 4
         self.mlp = nn.Sequential(
@@ -254,9 +262,8 @@ class XConv(nn.Module):
         batch_size = x.shape[0]
         in_channels = x.shape[1]
         num_points = x.shape[2]
-        num_samples = num_points // self.stride
         p = x[:, :3]  # XYZ coordinates
-        q = F.farthest_point_sample(p, num_samples)
+        q = F.farthest_point_sample(p, self.num_samples)
         _, index = F.knn(p, q, self.kernel_size * self.dilation)
         index = index[:, :: self.dilation]
         index = index.reshape(batch_size, -1).unsqueeze(1)
