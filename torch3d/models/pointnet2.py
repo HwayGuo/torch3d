@@ -11,7 +11,7 @@ class PointNetSSG(nn.Module):
     Args:
         in_channels (int): Number of channels in the input point set
         num_classes (int): Number of classes in the dataset
-        dropout (float): Dropout rate in the classifier. Default: 0.5
+        dropout (float, optional): Dropout rate in the classifier. Default: 0.5
     """  # noqa
 
     def __init__(self, in_channels, num_classes, dropout=0.5):

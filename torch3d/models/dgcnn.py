@@ -11,7 +11,7 @@ class DGCNN(nn.Module):
     Args:
         in_channels (int): Number of channels in the input point set
         num_classes (int): Number of classes in the dataset
-        dropout (float): Dropout rate in the classifier. Default: 0.5
+        dropout (float, optional): Dropout rate in the classifier. Default: 0.5
     """  # noqa
 
     def __init__(self, in_channels, num_classes, dropout=0.5):
@@ -28,11 +28,11 @@ class DGCNN(nn.Module):
         self.mlp = nn.Sequential(
             nn.Linear(1024, 512, bias=False),
             nn.BatchNorm1d(512),
-            nn.ReLU(True),
+            nn.LeakyReLU(0.2, True),
             nn.Dropout(dropout),
             nn.Linear(512, 256, bias=False),
             nn.BatchNorm1d(256),
-            nn.ReLU(True),
+            nn.LeakyReLU(0.2, True),
             nn.Dropout(dropout),
         )
         self.fc = nn.Linear(256, num_classes)

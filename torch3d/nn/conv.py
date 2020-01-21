@@ -20,13 +20,12 @@ class EdgeConv(nn.Sequential):
         self.in_channels = in_channels
         self.out_channels = _single(out_channels)
         self.kernel_size = kernel_size
-        self.bias = bias
         in_channels = in_channels * 2
         modules = []
         for channels in self.out_channels:
-            modules.append(nn.Conv2d(in_channels, channels, 1, bias=self.bias))
+            modules.append(nn.Conv2d(in_channels, channels, 1, bias=bias))
             modules.append(nn.BatchNorm2d(channels))
-            modules.append(nn.ReLU(True))
+            modules.append(nn.LeakyReLU(0.2, True))
             in_channels = channels
         modules.append(nn.MaxPool2d([kernel_size, 1]))
         super(EdgeConv, self).__init__(*modules)
@@ -68,11 +67,10 @@ class SetConv(nn.Sequential):
         self.kernel_size = kernel_size
         self.stride = stride
         self.radius = radius
-        self.bias = bias
         in_channels = self.in_channels
         modules = []
         for channels in self.out_channels:
-            modules.append(nn.Conv2d(in_channels, channels, 1, bias=self.bias))
+            modules.append(nn.Conv2d(in_channels, channels, 1, bias=bias))
             modules.append(nn.BatchNorm2d(channels))
             modules.append(nn.ReLU(True))
             in_channels = channels
@@ -131,36 +129,35 @@ class PointConv(nn.Module):
         self.kernel_size = kernel_size
         self.stride = stride
         self.bandwidth = bandwidth
-        self.bias = bias
         self.scale = nn.Sequential(
-            nn.Conv1d(1, 8, 1, bias=self.bias),
+            nn.Conv1d(1, 8, 1, bias=bias),
             nn.BatchNorm1d(8),
             nn.ReLU(True),
-            nn.Conv1d(8, 8, 1, bias=self.bias),
+            nn.Conv1d(8, 8, 1, bias=bias),
             nn.BatchNorm1d(8),
             nn.ReLU(True),
-            nn.Conv1d(8, 1, 1, bias=self.bias),
+            nn.Conv1d(8, 1, 1, bias=bias),
             nn.Sigmoid(),
         )
         self.weight = nn.Sequential(
-            nn.Conv2d(3, 8, 1, bias=self.bias),
+            nn.Conv2d(3, 8, 1, bias=bias),
             nn.BatchNorm2d(8),
             nn.ReLU(True),
-            nn.Conv2d(8, 8, 1, bias=self.bias),
+            nn.Conv2d(8, 8, 1, bias=bias),
             nn.BatchNorm2d(8),
             nn.ReLU(True),
-            nn.Conv2d(8, 16, 1, bias=self.bias),
+            nn.Conv2d(8, 16, 1, bias=bias),
         )
         in_channels = self.in_channels
         modules = []
         for channels in self.out_channels[:-1]:
-            modules.append(nn.Conv2d(in_channels, channels, 1, bias=self.bias))
+            modules.append(nn.Conv2d(in_channels, channels, 1, bias=bias))
             modules.append(nn.BatchNorm2d(channels))
             modules.append(nn.ReLU(True))
             in_channels = channels
         self.mlp = nn.Sequential(*modules)
         self.lin = nn.Sequential(
-            nn.Conv2d(in_channels, self.out_channels[-1], [16, 1], bias=self.bias),
+            nn.Conv2d(in_channels, self.out_channels[-1], [16, 1], bias=bias),
             nn.BatchNorm2d(self.out_channels[-1]),
             nn.ReLU(True),
         )
