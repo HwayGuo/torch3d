@@ -4,6 +4,16 @@ from torch3d.nn import SetConv
 
 
 class PointNetSSG(nn.Module):
+    """
+    PointNet++ single-scale grouping model from the
+    `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space" <https://arxiv.org/abs/1706.02413>`_ paper.
+
+    Args:
+        in_channels (int): Number of channels in the input point set
+        num_classes (int): Number of classes in the dataset
+        dropout (float): Dropout rate in the classifier. Default: 0.5
+    """  # noqa
+
     def __init__(self, in_channels, num_classes, dropout=0.5):
         super(PointNetSSG, self).__init__()
         self.in_channels = in_channels

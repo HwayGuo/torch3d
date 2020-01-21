@@ -5,8 +5,13 @@ from torch3d.nn import EdgeConv
 
 class DGCNN(nn.Module):
     """
-    DGCNN classification model from `"Dynamic Graph CNN for Learning on Point Clouds" <https://arxiv.org/abs/1801.07829>`_.
+    DGCNN classification model from the
+    `"Dynamic Graph CNN for Learning on Point Clouds" <https://arxiv.org/abs/1801.07829>`_ paper.
 
+    Args:
+        in_channels (int): Number of channels in the input point set
+        num_classes (int): Number of classes in the dataset
+        dropout (float): Dropout rate in the classifier. Default: 0.5
     """  # noqa
 
     def __init__(self, in_channels, num_classes, dropout=0.5):

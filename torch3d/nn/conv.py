@@ -6,8 +6,8 @@ from torch3d.nn.utils import _single
 
 class EdgeConv(nn.Sequential):
     """
-    The edge convolution layer introduced in the `"Dynamic Graph CNN for Learning on Point Clouds"
-    <https://arxiv.org/abs/1801.07829>`_ paper.
+    The edge convolution layer from the
+    `"Dynamic Graph CNN for Learning on Point Clouds" <https://arxiv.org/abs/1801.07829>`_ paper.
 
     Args:
         in_channels (int): Number of channels in the input point set
@@ -48,8 +48,8 @@ class EdgeConv(nn.Sequential):
 
 class SetConv(nn.Sequential):
     """
-    The set abstraction layer introduced in the `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space"
-    <https://arxiv.org/abs/1706.02413>`_ paper.
+    The set abstraction layer from the
+    `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space" <https://arxiv.org/abs/1706.02413>`_ paper.
 
     Args:
         in_channels (int): Number of channels in the input point set
@@ -104,8 +104,8 @@ class SetConv(nn.Sequential):
 
 class PointConv(nn.Module):
     """
-    The point convolution layer introduced in the `"PointConv: Deep Convolutional Networks on 3D Point Clouds"
-    <https://arxiv.org/abs/1811.07246>`_ paper.
+    The point convolution layer from the
+    `"PointConv: Deep Convolutional Networks on 3D Point Clouds" <https://arxiv.org/abs/1811.07246>`_ paper.
 
     Args:
         in_channels (int): Number of channels in the input point set
