@@ -25,7 +25,7 @@ if CUDA_HOME is not None:
 
 ext_modules = [extension("torch3d._C", sources, define_macros=define_macros)]
 
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 url = "https://github.com/pqhieu/torch3d"
 
 setup(
