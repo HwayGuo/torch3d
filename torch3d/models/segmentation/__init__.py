@@ -1,3 +1,3 @@
-from .pointnet import PointNet
-from .pointnet2 import PointNetSSG
-from .dgcnn import DGCNN
+from .pointnet import *
+from .pointnet2 import *
+from .dgcnn import *

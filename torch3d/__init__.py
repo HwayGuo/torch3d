@@ -3,5 +3,3 @@ from torch3d import models
 from torch3d import metrics
 from torch3d import nn
 from torch3d import transforms
-
-from .functional import meshgrid2d

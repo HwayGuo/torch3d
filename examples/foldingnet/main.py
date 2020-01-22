@@ -34,13 +34,13 @@ class Folding3d(nn.Sequential):
 
 
 class FoldingNet(nn.Module):
-    def __init__(self, in_channels, meshgrid=[-0.3, 0.3, 45]):
+    def __init__(self, in_channels):
         super(FoldingNet, self).__init__()
-        self.in_channels = in_channels
-        self.start = meshgrid[0]
-        self.end = meshgrid[1]
-        self.steps = meshgrid[2]
-        self.grid_size = self.steps ** 2
+        xx = np.linspace(-0.3, 0.3, 45, dtype=np.float32)
+        yy = np.linspace(-0.3, 0.3, 45, dtype=np.float32)
+        self.grid = np.meshgrid(xx, yy)
+        self.grid = torch.tensor(self.grid).view(2, -1)
+        self.grid_size = self.grid.shape[1]
         self.mlp1 = nn.Sequential(
             nn.Conv1d(in_channels, 64, 1, bias=False),
             nn.BatchNorm1d(64),
@@ -76,7 +76,7 @@ class FoldingNet(nn.Module):
         x = self.maxpool(x).squeeze(2)
         x = self.mlp3(x)
         # Decode by folding
-        g = torch3d.meshgrid2d(self.start, self.end, self.steps, device=device)
+        g = self.grid.to(device)
         g = g.unsqueeze(0).repeat(batch_size, 1, 1)
         x = x.unsqueeze(2).repeat(1, 1, self.grid_size)
         g = torch.cat([x, g], dim=1)
