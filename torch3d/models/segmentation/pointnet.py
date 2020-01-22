@@ -5,9 +5,6 @@ import torch.nn as nn
 class PointNet(nn.Module):
     def __init__(self, in_channels, num_classes, dropout=0.5):
         super(PointNet, self).__init__()
-        self.in_channels = in_channels
-        self.num_classes = num_classes
-        self.dropout = dropout
         self.mlp1 = nn.Sequential(
             nn.Conv1d(in_channels, 64, 1, bias=False),
             nn.BatchNorm1d(64),
