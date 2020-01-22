@@ -2,4 +2,4 @@ include README.md
 include LICENSE
 
 recursive-exclude * __pycache__
-recursive-include *.h
+recursive-include torch3d *.h
