@@ -11,7 +11,7 @@ class S3DIS(VisionDataset):
 
     """
 
-    name = "S3DIS"
+    name = "s3dis"
     url = "https://shapenet.cs.stanford.edu/media/indoor3d_sem_seg_hdf5_data.zip"
     basedir = "indoor3d_sem_seg_hdf5_data"
     flist = [
