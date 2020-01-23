@@ -5,12 +5,11 @@
 [![PyPI](https://img.shields.io/pypi/v/torch3d)](https://pypi.org/project/torch3d)
 [![License](https://img.shields.io/github/license/pqhieu/torch3d)](LICENSE)
 
-Torch3d is a PyTorch library consisting of datasets, model architectures, and
-common operations for 3D deep learning. For 3D domain, there is currently no
-official support from PyTorch that likes [torchvision](https://github.com/pytorch/vision)
-for images. Torch3d aims to fill this gap by streamlining the prototyping
-process of deep learning on 3D domain. Currently, Torch3d focuses on deep
-learning methods on 3D point sets.
+## Why Torch3d?
+
+Torch3d is a PyTorch library consisting of datasets, model architectures, and common operations for 3D deep learning.
+For 3D domain, there is currently no official support from PyTorch that likes [torchvision](https://github.com/pytorch/vision) for images.
+Torch3d aims to fill this gap by streamlining the prototyping process of deep learning on 3D domain.
 
 
 ## Installation
@@ -54,6 +53,7 @@ Torch3d composes of the following modules:
   + PointNet from Qi et al. (CVPR 2017) [[Paper](https://arxiv.org/abs/1612.00593)]
   + PoinNet++ from Qi et al. (NeurIPS 2017) [[Paper](https://arxiv.org/abs/1706.02413)]
   + DGCNN from Wang et al. (ToG 2019) [[Paper](https://arxiv.org/abs/1801.07829)]
+  + PointCNN from Li et al. (NeurIPS 2018) [[Paper](https://arxiv.org/abs/1801.07791)]
   + FoldingNet from Yang et al. (CVPR 2018) [[Paper](https://arxiv.org/abs/1712.07262)]
   + PointConv from Wu et al. (CVPR 2019) [[Paper](https://arxiv.org/abs/1811.07246)]
 - **nn**: Low-level operators that can be used to build up complex 3D neural networks.
