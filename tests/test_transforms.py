@@ -11,6 +11,13 @@ def test_to_tensor():
     assert x.shape == size
 
 
+def test_random_point_sample():
+    x = np.random.rand(2048, 3)
+    for n in [1024, 2048, 4096]:
+        x = T.RandomPointSample(n)(x)
+        assert x.shape == (n, 3)
+
+
 def test_compose():
     size = torch.Size([3, 1024])
     x = np.random.rand(2048, 3)

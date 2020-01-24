@@ -7,47 +7,64 @@ def test_conv():
     names = ["EdgeConv", "SetAbstraction", "PointConv", "XConv"]
     batch_size = 2
     in_channels = 3
-    out_channels = 64
     kernel_size = 32
     num_points = 1024
-    num_samples = 256
-    radius = 0.1
-    bandwidth = 0.1
     x = torch.rand(batch_size, in_channels, num_points)
 
     for name in names:
-        cls = getattr(nn, name)
+        module = getattr(nn, name)
         if name == "SetAbstraction":
-            size = torch.Size([batch_size, out_channels + 3, num_samples])
-            conv = cls(in_channels, out_channels, num_samples, kernel_size, radius)
+            out_channels = [64, 64]
+            radius = 0.1
+            for num_samples, channels in zip([1, 256], [64, 64 + 3]):
+                size = torch.Size([batch_size, channels, num_samples])
+                conv = module(
+                    in_channels, out_channels[-1], num_samples, kernel_size, radius
+                )
+                assert conv(x).shape == size
         elif name == "PointConv":
-            size = torch.Size([batch_size, out_channels + 3, num_samples])
-            conv = cls(in_channels, out_channels, num_samples, kernel_size, bandwidth)
+            out_channels = [64, 64]
+            bandwidth = 0.1
+            for num_samples, channels in zip([1, 256], [64, 64 + 3]):
+                size = torch.Size([batch_size, channels, num_samples])
+                conv = module(
+                    in_channels, out_channels, num_samples, kernel_size, bandwidth
+                )
+                assert conv(x).shape == size
         elif name == "EdgeConv":
-            size = torch.Size([batch_size, out_channels, num_points])
-            conv = cls(in_channels, out_channels, kernel_size)
-        assert conv(x).shape == size
+            num_samples = 256
+            out_channels = [64, 64]
+            size = torch.Size([batch_size, out_channels[-1], num_points])
+            conv = module(in_channels, out_channels, kernel_size)
+            assert conv(x).shape == size
+        elif name == "XConv":
+            num_samples = 256
+            dilation = 1
+            out_channels = 64
+            size = torch.Size([batch_size, out_channels + 3, num_samples])
+            conv = module(in_channels, out_channels, num_samples, kernel_size, dilation)
+            assert conv(x).shape == size
 
 
 def test_deconv():
     names = ["FeaturePropagation", "PointDeconv"]
     batch_size = 2
     in_channels = 32
-    out_channels = 64
+    out_channels = [64, 64]
     kernel_size = 3
     num_points = 1024
-    bandwidth = 0.1
     x = torch.rand(batch_size, in_channels + 3, num_points)
     y = x.clone()
-    size = torch.Size([batch_size, out_channels + 3, num_points])
+    size = torch.Size([batch_size, out_channels[-1] + 3, num_points])
 
     for name in names:
-        cls = getattr(nn, name)
+        module = getattr(nn, name)
         if name == "FeaturePropagation":
-            dconv = cls(in_channels * 2, out_channels, kernel_size)
+            dconv = module(in_channels * 2, out_channels, kernel_size)
         elif name == "PointDeconv":
-            dconv = cls(in_channels * 2, out_channels, kernel_size, bandwidth)
-        assert dconv(x, y).shape == size
+            bandwidth = 0.1
+            dconv = module(in_channels * 2, out_channels, kernel_size, bandwidth)
+            assert dconv(x, y).shape == size
 
 
 def test_farthest_point_sample():

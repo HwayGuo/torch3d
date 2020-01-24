@@ -13,17 +13,17 @@ class EdgeConv(nn.Sequential):
     Args:
         in_channels (int): Number of channels in the input point set
         out_channels (int): Number of channels produced by the convolution
-        kernel_size (int): Neighborhood size of the convolution kernel
+        kernel_size (int, optional): Neighborhood size of the convolution kernel. Default: 1
         bias (bool, optional): If True, adds a learnable bias to the output. Default: ``True``
     """  # noqa
 
-    def __init__(self, in_channels, out_channels, kernel_size, bias=True):
+    def __init__(self, in_channels, out_channels, kernel_size=1, bias=True):
         self.in_channels = in_channels
-        self.out_channels = _single(out_channels)
         self.kernel_size = kernel_size
         in_channels = in_channels * 2
+        out_channels = _single(out_channels)
         modules = []
-        for channels in self.out_channels:
+        for channels in out_channels:
             modules.append(nn.Conv2d(in_channels, channels, 1, bias=bias))
             modules.append(nn.BatchNorm2d(channels))
             modules.append(nn.LeakyReLU(0.2, True))
