@@ -4,7 +4,7 @@ from torch3d.nn import functional as F
 from torch3d.nn.utils import _single
 
 
-class SetConvTranspose(nn.Sequential):
+class FeaturePropagation(nn.Sequential):
     """
     The feature propagation from the
     `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space" <https://arxiv.org/abs/1706.02413>`_ paper.
@@ -13,7 +13,7 @@ class SetConvTranspose(nn.Sequential):
         in_channels (int): Number of channels in the input point set
         out_channels (int): Number of channels produced by the convolution
         kernel_size (int, optional): Neighborhood size of the convolution kernel. Default: 1
-        bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
+        bias (bool, optional): If True, adds a learnable bias to the output. Default: ``True``
     """  # noqa
 
     def __init__(self, in_channels, out_channels, kernel_size=1, bias=True):
@@ -26,19 +26,19 @@ class SetConvTranspose(nn.Sequential):
             modules.append(nn.BatchNorm1d(channels))
             modules.append(nn.ReLU(True))
             in_channels = channels
-        super(SetConvTranspose, self).__init__(*modules)
+        super(FeaturePropagation, self).__init__(*modules)
 
     def forward(self, x, y):
         p, x = x[:, :3], x[:, 3:]
         q, y = y[:, :3], y[:, 3:]
         x = F.interpolate(p, q, x, self.kernel_size)
         x = torch.cat([x, y], dim=1)
-        x = super(SetConvTranspose, self).forward(x)
+        x = super(FeaturePropagation, self).forward(x)
         x = torch.cat([q, x], dim=1)
         return x
 
 
-class PointConvTranspose(nn.Module):
+class PointDeconv(nn.Module):
     """
     The point deconvolution layer from the
     `"PointConv: Deep Convolutional Networks on 3D Point Clouds" <https://arxiv.org/abs/1811.07246>`_ paper.
@@ -48,13 +48,13 @@ class PointConvTranspose(nn.Module):
         out_channels (int): Number of channels produced by the convolution
         kernel_size (int, optional): Neighborhood size of the convolution kernel. Default: 1
         bandwidth (float, optional): Bandwidth of kernel density estimation. Default: 1.0
-        bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
+        bias (bool, optional): If True, adds a learnable bias to the output. Default: ``True``
     """  # noqa
 
     def __init__(
         self, in_channels, out_channels, kernel_size=1, bandwidth=1.0, bias=True
     ):
-        super(PointConvTranspose, self).__init__()
+        super(PointDeconv, self).__init__()
         self.kernel_size = kernel_size
         self.bandwidth = bandwidth
         self.scale = nn.Sequential(

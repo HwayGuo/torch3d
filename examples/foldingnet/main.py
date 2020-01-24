@@ -174,6 +174,7 @@ def visualize(points, predict):
         plt.add_mesh(
             points[i],
             render_points_as_spheres=True,
+            color="gray",
             point_size=8.0,
             ambient=0.1,
             diffuse=0.8,
@@ -187,6 +188,8 @@ def visualize(points, predict):
             mesh,
             render_points_as_spheres=True,
             point_size=8.0,
+            cmap="rainbow",
+            show_scalar_bar=False,
             ambient=0.1,
             diffuse=0.8,
             specular=0.5,

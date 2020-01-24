@@ -13,11 +13,11 @@ class S3DIS(data.Dataset):
         root (string): Root directory of dataset where the directory ``indoor3d_sem_seg_hdf5_data``
             exists or will be saved to if download is set to True.
         train (bool, optional): If True, create dataset from train set, otherwise create from
-            test set. Default: ``True``.
-        download (bool, optional): If True, download the dataset and put it in the root directory.
-            If the dataset is already downloaded, then do nothing. Default: ``False``.
+            test set. Default: ``True``
         transforms (callable, optional): A function/transform that takes input sample and its
-            target as entry and return a transformed version. Default: ``None``.
+            target as entry and return a transformed version. Default: ``None``
+        download (bool, optional): If True, download the dataset and put it in the root directory.
+            If the dataset is already downloaded, then do nothing. Default: ``False``
     """
 
     basedir = "indoor3d_sem_seg_hdf5_data"
@@ -66,7 +66,7 @@ class S3DIS(data.Dataset):
         "clutter",
     ]
 
-    def __init__(self, root, train=True, test_area=5, download=False, transforms=None):
+    def __init__(self, root, train=True, test_area=5, transforms=None, download=False):
         super(S3DIS, self).__init__()
         self.root = root
         self.train = train

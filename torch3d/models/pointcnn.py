@@ -5,7 +5,7 @@ from torch3d.nn import XConv
 
 class PointCNN(nn.Module):
     """
-    PointCNN classification model from the
+    PointCNN classification architecture from the
     `"PointCNN: Convolution On X-Transformed Points" <https://arxiv.org/abs/1801.07791>`_ paper.
 
     Args:

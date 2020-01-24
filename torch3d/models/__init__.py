@@ -4,3 +4,11 @@ from .dgcnn import *
 from .pointcnn import *
 
 from . import segmentation
+
+
+__all__ = [
+    "PointNet",
+    "PointNetSSG",
+    "DGCNN",
+    "PointCNN",
+]

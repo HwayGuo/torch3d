@@ -4,7 +4,7 @@ import torch3d.nn.functional as F
 
 
 def test_conv():
-    names = ["EdgeConv", "SetConv", "PointConv", "XConv"]
+    names = ["EdgeConv", "SetAbstraction", "PointConv", "XConv"]
     batch_size = 2
     in_channels = 3
     out_channels = 64
@@ -17,7 +17,7 @@ def test_conv():
 
     for name in names:
         cls = getattr(nn, name)
-        if name == "SetConv":
+        if name == "SetAbstraction":
             size = torch.Size([batch_size, out_channels + 3, num_samples])
             conv = cls(in_channels, out_channels, num_samples, kernel_size, radius)
         elif name == "PointConv":
@@ -30,7 +30,7 @@ def test_conv():
 
 
 def test_deconv():
-    names = ["SetConvTranspose", "PointConvTranspose"]
+    names = ["FeaturePropagation", "PointDeconv"]
     batch_size = 2
     in_channels = 32
     out_channels = 64
@@ -43,9 +43,9 @@ def test_deconv():
 
     for name in names:
         cls = getattr(nn, name)
-        if name == "SetConvTranspose":
+        if name == "FeaturePropagation":
             dconv = cls(in_channels * 2, out_channels, kernel_size)
-        elif name == "PointConvTranspose":
+        elif name == "PointDeconv":
             dconv = cls(in_channels * 2, out_channels, kernel_size, bandwidth)
         assert dconv(x, y).shape == size
 

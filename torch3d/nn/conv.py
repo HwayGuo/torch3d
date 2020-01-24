@@ -14,7 +14,7 @@ class EdgeConv(nn.Sequential):
         in_channels (int): Number of channels in the input point set
         out_channels (int): Number of channels produced by the convolution
         kernel_size (int): Neighborhood size of the convolution kernel
-        bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
+        bias (bool, optional): If True, adds a learnable bias to the output. Default: ``True``
     """  # noqa
 
     def __init__(self, in_channels, out_channels, kernel_size, bias=True):
@@ -46,7 +46,7 @@ class EdgeConv(nn.Sequential):
         return x
 
 
-class SetConv(nn.Sequential):
+class SetAbstraction(nn.Sequential):
     """
     The set abstraction layer from the
     `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space" <https://arxiv.org/abs/1706.02413>`_ paper.
@@ -57,7 +57,7 @@ class SetConv(nn.Sequential):
         num_samples (int, optional): Number of samples when perform downsampling. Default: 1
         kernel_size (int, optional): Neighborhood size of the convolution kernel. Default: 1
         radius (float, optional): Radius for the neighborhood search. Default: 1.0
-        bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
+        bias (bool, optional): If True, adds a learnable bias to the output. Default: ``True``
     """  # noqa
 
     def __init__(
@@ -80,7 +80,7 @@ class SetConv(nn.Sequential):
             modules.append(nn.ReLU(True))
             in_channels = channels
         modules.append(nn.AdaptiveMaxPool2d([1, None]))
-        super(SetConv, self).__init__(*modules)
+        super(SetAbstraction, self).__init__(*modules)
 
     def forward(self, x):
         batch_size = x.shape[0]
@@ -95,12 +95,12 @@ class SetConv(nn.Sequential):
             x = torch.gather(x, 2, index)
             x = x.view(batch_size, in_channels, self.kernel_size, -1)
             x[:, :3] -= q.unsqueeze(2).expand(-1, -1, self.kernel_size, -1)
-            x = super(SetConv, self).forward(x)
+            x = super(SetAbstraction, self).forward(x)
             x = x.squeeze(2)
             x = torch.cat([q, x], dim=1)
         else:
             x = x.unsqueeze(3)
-            x = super(SetConv, self).forward(x)
+            x = super(SetAbstraction, self).forward(x)
             x = x.squeeze(2)
         return x
 
@@ -116,7 +116,7 @@ class PointConv(nn.Module):
         num_samples (int, optional): Number of samples when perform downsampling. Default: 1
         kernel_size (int, optional): Neighborhood size of the convolution kernel. Default: 1
         bandwidth (float, optional): Bandwidth of kernel density estimation. Default: 1.0
-        bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
+        bias (bool, optional): If True, adds a learnable bias to the output. Default: ``True``
     """  # noqa
 
     def __init__(
@@ -212,7 +212,7 @@ class XConv(nn.Module):
         num_samples (int, optional): Number of samples when perform downsampling. Default: 1
         kernel_size (int, optional): Neighborhood size of the convolution kernel. Default: 1
         dilation (int, optional): Controls the sampling rate between kernel points. Default: 1
-        bias (bool, optional): If ``True``, adds a learnable bias to the output. Default: ``True``
+        bias (bool, optional): If True, adds a learnable bias to the output. Default: ``True``
     """  # noqa
 
     def __init__(

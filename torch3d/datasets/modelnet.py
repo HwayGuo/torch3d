@@ -13,11 +13,11 @@ class ModelNet40(data.Dataset):
         root (string): Root directory of dataset where the directory ``modelnet40_ply_hdf5_2048``
             exists or will be saved to if download is set to True.
         train (bool, optional): If True, create dataset from train set, otherwise create from
-            test set. Default: ``True``.
-        download (bool, optional): If True, download the dataset and put it in the root directory.
-            If the dataset is already downloaded, then do nothing. Default: ``False``.
+            test set. Default: ``True``
         transforms (callable, optional): A function/transform that takes input sample and its
-            target as entry and return a transformed version.
+            target as entry and return a transformed version. Default: ``None``
+        download (bool, optional): If True, download the dataset and put it in the root directory.
+            If the dataset is already downloaded, then do nothing. Default: ``False``
     """
 
     basedir = "modelnet40_ply_hdf5_2048"

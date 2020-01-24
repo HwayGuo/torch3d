@@ -36,7 +36,7 @@ def to_tensor(pcd):
         )
 
     if _is_numpy(pcd):
-        pcd = torch.from_numpy(pcd.T)
+        pcd = torch.from_numpy(pcd.T).contiguous()
         return pcd
 
 

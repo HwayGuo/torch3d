@@ -4,7 +4,7 @@ import torch.nn as nn
 
 class PointNet(nn.Module):
     """
-    PointNet classification model from the
+    PointNet classification architecture from the
     `"PointNet: Deep Learning on Point Sets for 3D Classification and Segmentation" <https://arxiv.org/abs/1612.00593>`_ paper.
 
     Args:
