@@ -1,20 +1,30 @@
 import os
 import h5py
 import numpy as np
-from torchvision.datasets import VisionDataset
+import torch.utils.data as data
 from torchvision.datasets.utils import download_and_extract_archive, check_integrity
 
 
-class S3DIS(VisionDataset):
+class S3DIS(data.Dataset):
     """
     The `S3DIS <http://buildingparser.stanford.edu/dataset.html>`_ dataset.
 
+    Args:
+        root (string): Root directory of dataset where the directory ``indoor3d_sem_seg_hdf5_data``
+            exists or will be saved to if download is set to True.
+        train (bool, optional): If True, create dataset from train set, otherwise create from
+            test set. Default: ``True``.
+        download (bool, optional): If True, download the dataset and put it in the root directory.
+            If the dataset is already downloaded, then do nothing. Default: ``False``.
+        transforms (callable, optional): A function/transform that takes input sample and its
+            target as entry and return a transformed version. Default: ``None``.
     """
 
-    name = "s3dis"
-    url = "https://shapenet.cs.stanford.edu/media/indoor3d_sem_seg_hdf5_data.zip"
     basedir = "indoor3d_sem_seg_hdf5_data"
-    flist = [
+    url = "https://shapenet.cs.stanford.edu/media/indoor3d_sem_seg_hdf5_data.zip"
+    md5_zip = "f07d79acdea1f497b3fb3d32f34f1428"
+
+    filelist = [
         ("ply_data_all_0.h5", "ec71baeb8b8cf19f75e626225974ae1d"),
         ("ply_data_all_1.h5", "4d61066842bbbc383e0a9a8e34414630"),
         ("ply_data_all_2.h5", "f64d91e4b7084b6b9b9e6cb9511ac767"),
@@ -56,19 +66,12 @@ class S3DIS(VisionDataset):
         "clutter",
     ]
 
-    def __init__(
-        self,
-        root,
-        train=True,
-        test_area=5,
-        download=False,
-        transform=None,
-        target_transform=None,
-        transforms=None,
-    ):
-        super(S3DIS, self).__init__(root, transforms, transform, target_transform)
+    def __init__(self, root, train=True, test_area=5, download=False, transforms=None):
+        super(S3DIS, self).__init__()
+        self.root = root
         self.train = train
         self.test_area = test_area
+        self.transforms = None
 
         if download:
             self.download()
@@ -77,48 +80,45 @@ class S3DIS(VisionDataset):
             raise RuntimeError("Dataset not found or corrupted.")
 
         self.data = []
-        self.targets = []
-
-        for filename, md5 in self.flist:
-            h5 = h5py.File(os.path.join(self.root, self.name, filename), "r")
+        self.labels = []
+        for filename, md5 in self.filelist:
+            h5 = h5py.File(os.path.join(self.root, self.basedir, filename), "r")
             assert "data" in h5 and "label" in h5
             self.data.append(np.array(h5["data"][:]))
-            self.targets.append(np.array(h5["label"][:]))
+            self.labels.append(np.array(h5["label"][:]))
             h5.close()
-        self.data = np.concatenate(self.data, axis=0)
-        self.targets = np.concatenate(self.targets, axis=0).squeeze()
+        self.data = np.concatenate(self.data, 0)
+        self.labels = np.concatenate(self.labels, 0).squeeze()
 
         # Filter data that is not in the area of interest
-        with open(os.path.join(self.root, self.name, "room_filelist.txt")) as fp:
+        with open(os.path.join(self.root, self.basedir, "room_filelist.txt")) as fp:
             rooms = [x.strip() for x in fp]
-        area = "Area_" + str(self.test_area)
+        area = "Area_" + str(test_area)
         index = [i for i, room in enumerate(rooms) if area in room]
         if self.train:
             index = list(set(range(len(rooms))) - set(index))
         self.data = self.data[index]
-        self.targets = self.targets[index].astype(np.int64)
+        self.labels = self.labels[index].astype(np.int64)
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, i):
         pcd = self.data[i]
-        target = self.targets[i]
+        label = self.labels[i]
         if self.transforms is not None:
-            pcd, target = self.transforms(pcd, target)
-        return pcd, target
+            pcd, label = self.transforms(pcd, label)
+        return pcd, label
 
     def download(self):
-        if not self._check_integrity():
-            download_and_extract_archive(self.url, self.root)
-            os.rename(
-                os.path.join(self.root, self.basedir),
-                os.path.join(self.root, self.name),
-            )
+        if self._check_integrity():
+            print("Files already downloaded and verified")
+            return
+        download_and_extract_archive(self.url, self.root)
 
     def _check_integrity(self):
-        for filename, md5 in self.flist:
-            fpath = os.path.join(self.root, self.name, filename)
+        for filename, md5 in self.filelist:
+            fpath = os.path.join(self.root, self.basedir, filename)
             if not check_integrity(fpath, md5):
                 return False
         return True

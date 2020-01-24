@@ -9,6 +9,7 @@ class Compose(object):
 
     Args:
         transforms (list of ``Transform``): list of transforms to compose.
+
     Example:
         >>> transforms.Compose([
         >>>     transforms.Shuffle(),
@@ -26,20 +27,50 @@ class Compose(object):
 
 
 class ToTensor(object):
+    """
+    Convert a ``numpy.ndarray`` to tensor.
+
+    Converts a numpy.ndarray (N x C) to a torch.FloatTensor of shape (C x N).
+    """
+
     def __call__(self, pcd):
+        """
+        Args:
+            pcd (numpy.ndarray): Point cloud to be converted to tensor.
+
+        Returns:
+            Tensor: Converted point cloud.
+        """
         return F.to_tensor(pcd)
+
+    def __repr__(self):
+        return self.__class__.__name__ + "()"
 
 
 class Shuffle(object):
+    """Randomly shuffle the given point cloud.
+
+    Shuffles a numpy.ndarray (N x C) by random permutation.
+    """
+
     @staticmethod
     def get_params(pcd):
+        """Get a random order for a shuffle.
+
+        Args:
+            pcd (numpy.ndarray): Point cloud to be shuffled.
+
+        Returns:
+            numpy.ndarray: A random permuted sequence.
+        """
+
         n = len(pcd)
         assert n > 0
         return np.random.permutation(n)
 
     def __call__(self, pcd):
-        index = self.get_params(pcd)
-        return pcd[index]
+        perm = self.get_params(pcd)
+        return pcd[perm]
 
 
 class RandomPointSample(object):

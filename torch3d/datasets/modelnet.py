@@ -1,19 +1,28 @@
 import os
 import h5py
 import numpy as np
-from torchvision.datasets import VisionDataset
+import torch.utils.data as data
 from torchvision.datasets.utils import download_and_extract_archive, check_integrity
 
 
-class ModelNet40(VisionDataset):
+class ModelNet40(data.Dataset):
     """
     The `ModelNet40 <https://modelnet.cs.princeton.edu/>`_ dataset.
 
+    Args:
+        root (string): Root directory of dataset where the directory ``modelnet40_ply_hdf5_2048``
+            exists or will be saved to if download is set to True.
+        train (bool, optional): If True, create dataset from train set, otherwise create from
+            test set. Default: ``True``.
+        download (bool, optional): If True, download the dataset and put it in the root directory.
+            If the dataset is already downloaded, then do nothing. Default: ``False``.
+        transforms (callable, optional): A function/transform that takes input sample and its
+            target as entry and return a transformed version.
     """
 
-    name = "modelnet40"
-    url = "https://shapenet.cs.stanford.edu/media/modelnet40_ply_hdf5_2048.zip"
     basedir = "modelnet40_ply_hdf5_2048"
+    url = "https://shapenet.cs.stanford.edu/media/modelnet40_ply_hdf5_2048.zip"
+
     splits = {
         "train": [
             ("ply_data_train0.h5", "3176385ffc31a7b6b5af22191fd920d1"),
@@ -27,60 +36,12 @@ class ModelNet40(VisionDataset):
             ("ply_data_test1.h5", "aba4b12a67c34391cc3c015a6f08ed4b"),
         ],
     }
-    categories = [
-        "airplane",
-        "bathtub",
-        "bed",
-        "bench",
-        "bookshelf",
-        "bottle",
-        "bowl",
-        "car",
-        "chair",
-        "cone",
-        "cup",
-        "curtain",
-        "desk",
-        "door",
-        "dresser",
-        "flower_pot",
-        "glass_box",
-        "guitar",
-        "keyboard",
-        "lamp",
-        "laptop",
-        "mantel",
-        "monitor",
-        "night_stand",
-        "person",
-        "piano",
-        "plant",
-        "radio",
-        "range_hood",
-        "sink",
-        "sofa",
-        "stairs",
-        "stool",
-        "table",
-        "tent",
-        "toilet",
-        "tv_stand",
-        "vase",
-        "wardrobe",
-        "xbox",
-    ]
 
-    def __init__(
-        self,
-        root,
-        train=True,
-        download=False,
-        transform=None,
-        target_transform=None,
-        transforms=None,
-    ):
-        super(ModelNet40, self).__init__(root, transforms, transform, target_transform)
+    def __init__(self, root, train=True, transforms=None, download=False):
+        super(ModelNet40, self).__init__()
+        self.root = root
         self.train = train
+        self.transforms = transforms
 
         if download:
             self.download()
@@ -89,45 +50,46 @@ class ModelNet40(VisionDataset):
             raise RuntimeError("Dataset not found or corrupted.")
 
         if self.train:
-            flist = self.splits["train"]
+            filelist = self.splits["train"]
         else:
-            flist = self.splits["test"]
+            filelist = self.splits["test"]
 
         self.data = []
-        self.targets = []
-
-        for filename, md5 in flist:
-            h5 = h5py.File(os.path.join(self.root, self.name, filename), "r")
+        self.labels = []
+        for filename, md5 in filelist:
+            h5 = h5py.File(os.path.join(root, self.basedir, filename), "r")
             assert "data" in h5 and "label" in h5
             self.data.append(np.array(h5["data"][:]))
-            self.targets.append(np.array(h5["label"][:]))
+            self.labels.append(np.array(h5["label"][:]))
             h5.close()
-        self.data = np.concatenate(self.data, axis=0)
-        self.targets = np.concatenate(self.targets, axis=0)
-        self.targets = np.squeeze(self.targets).astype(np.int64)
+
+        self.data = np.concatenate(self.data, 0)
+        self.labels = np.concatenate(self.labels, 0)
+        self.labels = np.squeeze(self.labels).astype(np.int64)
+
+        with open(os.path.join(root, self.basedir, "shape_names.txt"), "r") as fp:
+            self.categories = [x.strip() for x in fp]
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, i):
         pcd = self.data[i]
-        target = self.targets[i]
+        label = self.labels[i]
         if self.transforms is not None:
-            pcd, target = self.transforms(pcd, target)
-        return pcd, target
+            pcd, label = self.transforms(pcd, label)
+        return pcd, label
 
     def download(self):
-        if not self._check_integrity():
-            download_and_extract_archive(self.url, self.root)
-            os.rename(
-                os.path.join(self.root, self.basedir),
-                os.path.join(self.root, self.name),
-            )
+        if self._check_integrity():
+            print("Files already downloaded and verified")
+            return
+        download_and_extract_archive(self.url, self.root)
 
     def _check_integrity(self):
         flist = self.splits["train"] + self.splits["test"]
         for filename, md5 in flist:
-            fpath = os.path.join(self.root, self.name, filename)
+            fpath = os.path.join(self.root, self.basedir, filename)
             if not check_integrity(fpath, md5):
                 return False
         return True
