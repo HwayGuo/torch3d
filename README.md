@@ -44,8 +44,7 @@ Torch3d composes of the following modules:
 - **datasets**: Common 3D datasets for classification, semantic segmentation, and so on.
   + ModelNet40 [[URL](https://modelnet.cs.princeton.edu/)] (classification)
   + S3DIS [[URL](http://buildingparser.stanford.edu/dataset.html)] (semantic segmentation)
-  + ShapeNet [[URL](https://cs.stanford.edu/~ericyi/project_page/part_annotation/)] (part segmentation)
-  + SceneNN [[URL](http://scenenn.net/)] (semantic segmentation)
+  + ShapeNet [[URL](https://shapenet.cs.stanford.edu/iccv17/)] (part segmentation)
 - **metrics**: Metrics for on-the-fly training evaluation of different tasks.
   + Accuracy (classification, segmentation)
   + IoU (segmentation)
