@@ -10,17 +10,14 @@ class S3DIS(data.Dataset):
     The `S3DIS <http://buildingparser.stanford.edu/dataset.html>`_ dataset.
 
     Args:
-        root (string): Root directory of dataset where the directory ``indoor3d_sem_seg_hdf5_data``
-            exists or will be saved to if download is set to True.
-        train (bool, optional): If True, create dataset from train set, otherwise create from
-            test set. Default: ``True``
-        transforms (callable, optional): A function/transform that takes input sample and its
-            target as entry and return a transformed version. Default: ``None``
-        download (bool, optional): If True, download the dataset and put it in the root directory.
-            If the dataset is already downloaded, then do nothing. Default: ``False``
-    """
+        root (string): Root directory of dataset where the directory ``s3dis`` exists or will be saved to if download is set to True.
+        train (bool, optional): If True, create dataset from train set, otherwise create from test set. Default: ``True``
+        transforms (callable, optional): A function/transform that takes input sample and its target as entry and return a transformed version. Default: ``None``
+        download (bool, optional): If True, download the dataset and put it in the root directory. If the dataset is already downloaded, then do nothing. Default: ``False``
+    """  # noqa
 
-    basedir = "indoor3d_sem_seg_hdf5_data"
+    name = "s3dis"
+    basedir = "indoor_sem_seg_hdf5_data"
     url = "https://shapenet.cs.stanford.edu/media/indoor3d_sem_seg_hdf5_data.zip"
     md5_zip = "f07d79acdea1f497b3fb3d32f34f1428"
 
@@ -115,6 +112,9 @@ class S3DIS(data.Dataset):
             print("Files already downloaded and verified")
             return
         download_and_extract_archive(self.url, self.root)
+        os.rename(
+            os.path.join(self.root, self.basedir), os.path.join(self.root, self.name)
+        )
 
     def _check_integrity(self):
         for filename, md5 in self.filelist:

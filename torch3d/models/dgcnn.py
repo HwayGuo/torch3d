@@ -5,8 +5,7 @@ from torch3d.nn import EdgeConv
 
 class DGCNN(nn.Module):
     """
-    DGCNN classification architecture from the
-    `"Dynamic Graph CNN for Learning on Point Clouds" <https://arxiv.org/abs/1801.07829>`_ paper.
+    DGCNN classification architecture from the`"Dynamic Graph CNN for Learning on Point Clouds" <https://arxiv.org/abs/1801.07829>`_ paper.
 
     Args:
         in_channels (int): Number of channels in the input point set

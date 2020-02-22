@@ -48,14 +48,16 @@ class ToTensor(object):
 
 
 class Shuffle(object):
-    """Randomly shuffle the given point cloud.
+    """
+    Randomly shuffle the given point cloud.
 
     Shuffles a numpy.ndarray (N x C) by random permutation.
     """
 
     @staticmethod
     def get_params(pcd):
-        """Get a random order for a shuffle.
+        """
+        Get a random order for a shuffle.
 
         Args:
             pcd (numpy.ndarray): Point cloud to be shuffled.

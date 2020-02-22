@@ -7,8 +7,7 @@ from torch3d.nn.utils import _single
 
 class EdgeConv(nn.Sequential):
     """
-    The edge convolution layer from the
-    `"Dynamic Graph CNN for Learning on Point Clouds" <https://arxiv.org/abs/1801.07829>`_ paper.
+    The edge convolution layer from the `"Dynamic Graph CNN for Learning on Point Clouds" <https://arxiv.org/abs/1801.07829>`_ paper.
 
     Args:
         in_channels (int): Number of channels in the input point set
@@ -48,8 +47,7 @@ class EdgeConv(nn.Sequential):
 
 class SetAbstraction(nn.Sequential):
     """
-    The set abstraction layer from the
-    `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space" <https://arxiv.org/abs/1706.02413>`_ paper.
+    The set abstraction layer from the `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space" <https://arxiv.org/abs/1706.02413>`_ paper.
 
     Args:
         in_channels (int): Number of channels in the input point set
@@ -85,7 +83,6 @@ class SetAbstraction(nn.Sequential):
     def forward(self, x):
         batch_size = x.shape[0]
         in_channels = x.shape[1]
-        num_points = x.shape[2]
         if self.num_samples > 1:
             p = x[:, :3]  # XYZ coordinates
             q = F.farthest_point_sample(p, self.num_samples)
@@ -107,8 +104,7 @@ class SetAbstraction(nn.Sequential):
 
 class PointConv(nn.Module):
     """
-    The point convolution layer from the
-    `"PointConv: Deep Convolutional Networks on 3D Point Clouds" <https://arxiv.org/abs/1811.07246>`_ paper.
+    The point convolution layer from the `"PointConv: Deep Convolutional Networks on 3D Point Clouds" <https://arxiv.org/abs/1811.07246>`_ paper.
 
     Args:
         in_channels (int): Number of channels in the input point set
@@ -168,7 +164,6 @@ class PointConv(nn.Module):
     def forward(self, x):
         batch_size = x.shape[0]
         in_channels = x.shape[1]
-        num_points = x.shape[2]
         if self.num_samples > 1:
             p = x[:, :3]  # XYZ coordinates
             s = F.kernel_density(p, self.bandwidth).unsqueeze(1)
@@ -203,8 +198,7 @@ class PointConv(nn.Module):
 
 class XConv(nn.Module):
     """
-    The Χ-convolution layer from the
-    `"PointCNN: Convolution On X-Transformed Points" <https://arxiv.org/abs/1801.07791>`_ paper.
+    The Χ-convolution layer from the `"PointCNN: Convolution On X-Transformed Points" <https://arxiv.org/abs/1801.07791>`_ paper.
 
     Args:
         in_channels (int): Number of channels in the input point set
@@ -261,7 +255,6 @@ class XConv(nn.Module):
     def forward(self, x):
         batch_size = x.shape[0]
         in_channels = x.shape[1]
-        num_points = x.shape[2]
         p = x[:, :3]  # XYZ coordinates
         q = F.farthest_point_sample(p, self.num_samples)
         _, index = F.knn(p, q, self.kernel_size * self.dilation)

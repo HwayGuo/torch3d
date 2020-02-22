@@ -5,8 +5,7 @@ from torch3d.nn import SetAbstraction
 
 class PointNetSSG(nn.Module):
     """
-    PointNet++ single-scale grouping architecture from the
-    `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space" <https://arxiv.org/abs/1706.02413>`_ paper.
+    PointNet++ single-scale grouping architecture from the `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space" <https://arxiv.org/abs/1706.02413>`_ paper.
 
     Args:
         in_channels (int): Number of channels in the input point set

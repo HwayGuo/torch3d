@@ -6,8 +6,7 @@ from torch3d.nn.utils import _single
 
 class FeaturePropagation(nn.Sequential):
     """
-    The feature propagation from the
-    `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space" <https://arxiv.org/abs/1706.02413>`_ paper.
+    The feature propagation from the `"PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space" <https://arxiv.org/abs/1706.02413>`_ paper.
 
     Args:
         in_channels (int): Number of channels in the input point set
@@ -40,8 +39,7 @@ class FeaturePropagation(nn.Sequential):
 
 class PointDeconv(nn.Module):
     """
-    The point deconvolution layer from the
-    `"PointConv: Deep Convolutional Networks on 3D Point Clouds" <https://arxiv.org/abs/1811.07246>`_ paper.
+    The point deconvolution layer from the `"PointConv: Deep Convolutional Networks on 3D Point Clouds" <https://arxiv.org/abs/1811.07246>`_ paper.
 
     Args:
         in_channels (int): Number of channels in the input point set

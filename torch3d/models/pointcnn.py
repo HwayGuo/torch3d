@@ -5,8 +5,7 @@ from torch3d.nn import XConv
 
 class PointCNN(nn.Module):
     """
-    PointCNN classification architecture from the
-    `"PointCNN: Convolution On X-Transformed Points" <https://arxiv.org/abs/1801.07791>`_ paper.
+    PointCNN classification architecture from the `"PointCNN: Convolution On X-Transformed Points" <https://arxiv.org/abs/1801.07791>`_ paper.
 
     Args:
         in_channels (int): Number of channels in the input point set

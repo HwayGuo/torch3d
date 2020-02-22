@@ -10,16 +10,13 @@ class ModelNet40(data.Dataset):
     The `ModelNet40 <https://modelnet.cs.princeton.edu/>`_ dataset.
 
     Args:
-        root (string): Root directory of dataset where the directory ``modelnet40_ply_hdf5_2048``
-            exists or will be saved to if download is set to True.
-        train (bool, optional): If True, create dataset from train set, otherwise create from
-            test set. Default: ``True``
-        transforms (callable, optional): A function/transform that takes input sample and its
-            target as entry and return a transformed version. Default: ``None``
-        download (bool, optional): If True, download the dataset and put it in the root directory.
-            If the dataset is already downloaded, then do nothing. Default: ``False``
-    """
+        root (string): Root directory of dataset where the directory ``modelnet40`` exists or will be saved to if download is set to True.
+        train (bool, optional): If True, create dataset from train set, otherwise create from test set. Default: ``True``
+        transforms (callable, optional): A function/transform that takes input sample and its target as entry and return a transformed version. Default: ``None``
+        download (bool, optional): If True, download the dataset and put it in the root directory. If the dataset is already downloaded, then do nothing. Default: ``False``
+    """  # noqa
 
+    name = "modelnet40"
     basedir = "modelnet40_ply_hdf5_2048"
     url = "https://shapenet.cs.stanford.edu/media/modelnet40_ply_hdf5_2048.zip"
 
@@ -85,6 +82,9 @@ class ModelNet40(data.Dataset):
             print("Files already downloaded and verified")
             return
         download_and_extract_archive(self.url, self.root)
+        os.rename(
+            os.path.join(self.root, self.basedir), os.path.join(self.root, self.name)
+        )
 
     def _check_integrity(self):
         flist = self.splits["train"] + self.splits["test"]
