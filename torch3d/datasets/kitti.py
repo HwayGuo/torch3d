@@ -93,8 +93,10 @@ class KITTIDetection(data.Dataset):
         calib["P2"] = np.array([float(x) for x in lines[2][1:13]]).reshape(3, 4)
         calib["P3"] = np.array([float(x) for x in lines[3][1:13]]).reshape(3, 4)
         calib["R0"] = np.array([float(x) for x in lines[4][1:10]]).reshape(3, 3)
-        calib["velo_to_cam"] = np.array([float(x) for x in lines[5][1:13]]).reshape(3, 4)
-        calib["imu_to_velo"] = np.array([float(x) for x in lines[6][1:13]]).reshape(3, 4)
+        calib["velo_to_cam"] = np.array([float(x) for x in lines[5][1:13]])
+        calib["imu_to_velo"] = np.array([float(x) for x in lines[6][1:13]])
+        calib["velo_to_cam"] = calib["velo_to_cam"].reshape(3, 4)
+        calib["imu_to_velo"] = calib["imu_to_velo"].reshape(3, 4)
         return calib
 
     def parse_kitti_label(self, filename):
@@ -110,7 +112,6 @@ class KITTIDetection(data.Dataset):
         }
         with open(filename, "r") as fp:
             lines = [line.strip().split(" ") for line in fp.readlines()]
-        num_objects = len([x[0] for x in lines if x[0] != "DontCare"])
         annotations["name"] = np.array([x[0] for x in lines])
         annotations["truncated"] = np.array([float(x[1]) for x in lines])
         annotations["occluded"] = np.array([int(x[2]) for x in lines])
@@ -119,7 +120,9 @@ class KITTIDetection(data.Dataset):
         annotations["bbox"] = annotations["bbox"].reshape(-1, 4)
         annotations["size"] = np.array([[float(v) for v in x[8:11]] for x in lines])
         annotations["size"] = annotations["size"].reshape(-1, 3)
-        annotations["position"] = np.array([[float(v) for v in x[11:14]] for x in lines])
+        annotations["position"] = np.array(
+            [[float(v) for v in x[11:14]] for x in lines]
+        )
         annotations["position"] = annotations["position"].reshape(-1, 3)
         annotations["yaw"] = np.array([float(x[14]) for x in lines])
         annotations["yaw"] = annotations["yaw"].reshape(-1)
