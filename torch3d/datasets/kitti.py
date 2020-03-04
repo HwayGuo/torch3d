@@ -8,12 +8,14 @@ from PIL import Image
 
 class KITTIDetection(data.Dataset):
     """
-    The `KITTI <http://www.cvlibs.net/datasets/kitti/>`_ dataset.
+    The `KITTI Detection <http://www.cvlibs.net/datasets/kitti/>`_ dataset.
 
     Args:
       root (string): Root directory of the KITTI dataset.
-      transforms (callable, optional): A function/transform that takes input sample and
-        its target as entry and return a transformed version. Default: ``None``
+      split (string, optional): The dataset subset which can be either ``"train"``,
+        ``"val"``, or ``"test"``. Default: ``"train"``.
+      transforms (callable, optional): A function/transform that takes input sample
+        and its target as entry and return a transformed version. Default: ``None``.
     """  # noqa
 
     def __init__(self, root, split="train", transforms=None):
@@ -61,10 +63,10 @@ class KITTIDetection(data.Dataset):
         if self.split == "training":
             target = self._get_label(frameid)
 
-        input_dict = {"image": image, "lidar": lidar, "calib": calib}
+        inputs = {"image": image, "lidar": lidar, "calib": calib}
         if self.transforms is not None:
-            input_dict, target = self.transforms(input_dict, target)
-        return input_dict, target
+            inputs, target = self.transforms(inputs, target)
+        return inputs, target
 
     def _get_image(self, frameid):
         filename = os.path.join(self.image_path, "{:06d}.png".format(frameid))
