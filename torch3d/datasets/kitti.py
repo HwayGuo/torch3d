@@ -69,34 +69,43 @@ class KITTIDetection(data.Dataset):
         return inputs, target
 
     def _get_image(self, frameid):
-        filename = os.path.join(self.image_path, "{:06d}.png".format(frameid))
+        basename = "{:06d}.png".format(frameid)
+        filename = os.path.join(self.image_path, basename)
         image = Image.open(filename)
         return image
 
     def _get_lidar(self, frameid):
-        filename = os.path.join(self.lidar_path, "{:06d}.bin".format(frameid))
+        basename = "{:06d}.bin".format(frameid)
+        filename = os.path.join(self.lidar_path, basename)
         lidar = np.fromfile(filename, dtype=np.float32).reshape(-1, 4)
         return lidar
 
     def _get_calib(self, frameid):
-        filename = os.path.join(self.calib_path, "{:06d}.txt".format(frameid))
+        basename = "{:06d}.txt".format(frameid)
+        filename = os.path.join(self.calib_path, basename)
         return self.parse_kitti_calib(filename)
 
     def _get_label(self, frameid):
-        filename = os.path.join(self.label_path, "{:06d}.txt".format(frameid))
+        basename = "{:06d}.txt".format(frameid)
+        filename = os.path.join(self.label_path, basename)
         return self.parse_kitti_label(filename)
 
     def parse_kitti_calib(self, filename):
         calib = {}
         with open(filename, "r") as fp:
             lines = [line.strip().split(" ") for line in fp.readlines()]
-        calib["P0"] = np.array([float(x) for x in lines[0][1:13]]).reshape(3, 4)
-        calib["P1"] = np.array([float(x) for x in lines[1][1:13]]).reshape(3, 4)
-        calib["P2"] = np.array([float(x) for x in lines[2][1:13]]).reshape(3, 4)
-        calib["P3"] = np.array([float(x) for x in lines[3][1:13]]).reshape(3, 4)
-        calib["R0"] = np.array([float(x) for x in lines[4][1:10]]).reshape(3, 3)
+        calib["P0"] = np.array([float(x) for x in lines[0][1:13]])
+        calib["P1"] = np.array([float(x) for x in lines[1][1:13]])
+        calib["P2"] = np.array([float(x) for x in lines[2][1:13]])
+        calib["P3"] = np.array([float(x) for x in lines[3][1:13]])
+        calib["R0"] = np.array([float(x) for x in lines[4][1:10]])
         calib["velo_to_cam"] = np.array([float(x) for x in lines[5][1:13]])
         calib["imu_to_velo"] = np.array([float(x) for x in lines[6][1:13]])
+        calib["P0"] = calib["P0"].reshape(3, 4)
+        calib["P1"] = calib["P1"].reshape(3, 4)
+        calib["P2"] = calib["P2"].reshape(3, 4)
+        calib["P3"] = calib["P3"].reshape(3, 4)
+        calib["R0"] = calib["R0"].reshape(3, 3)
         calib["velo_to_cam"] = calib["velo_to_cam"].reshape(3, 4)
         calib["imu_to_velo"] = calib["imu_to_velo"].reshape(3, 4)
         return calib
@@ -109,7 +118,7 @@ class KITTIDetection(data.Dataset):
             "alpha": [],
             "bbox": [],
             "size": [],
-            "position": [],
+            "center": [],
             "yaw": [],
         }
         with open(filename, "r") as fp:
@@ -119,13 +128,11 @@ class KITTIDetection(data.Dataset):
         annotations["occluded"] = np.array([int(x[2]) for x in lines])
         annotations["alpha"] = np.array([float(x[3]) for x in lines])
         annotations["bbox"] = np.array([[float(v) for v in x[4:8]] for x in lines])
-        annotations["bbox"] = annotations["bbox"].reshape(-1, 4)
         annotations["size"] = np.array([[float(v) for v in x[8:11]] for x in lines])
-        annotations["size"] = annotations["size"].reshape(-1, 3)
-        annotations["position"] = np.array(
-            [[float(v) for v in x[11:14]] for x in lines]
-        )
-        annotations["position"] = annotations["position"].reshape(-1, 3)
+        annotations["center"] = np.array([[float(v) for v in x[11:14]] for x in lines])
         annotations["yaw"] = np.array([float(x[14]) for x in lines])
+        annotations["bbox"] = annotations["bbox"].reshape(-1, 4)
+        annotations["size"] = annotations["size"].reshape(-1, 3)
+        annotations["center"] = annotations["center"].reshape(-1, 3)
         annotations["yaw"] = annotations["yaw"].reshape(-1)
         return annotations
