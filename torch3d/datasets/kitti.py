@@ -18,9 +18,18 @@ class KITTIDetection(data.Dataset):
         version. Default: ``None``.
       rectified (bool, optional): If True, return the LiDAR point cloud
         in the camera rectified coordinate system. Default: ``True``.
-    """  # noqa
+      remove_dontcare (bool, optional): If True, remove DontCare label
+        from the ground truth annotations. Default: ``True``.
+    """
 
-    def __init__(self, root, split="train", transforms=None, rectified=True):
+    def __init__(
+        self,
+        root,
+        split="train",
+        transforms=None,
+        rectified=True,
+        remove_dontcare=True,
+    ):
         super(KITTIDetection, self).__init__()
         self.root = root
         if split in ["train", "val"]:
@@ -29,7 +38,7 @@ class KITTIDetection(data.Dataset):
             self.split = "testing"
         self.transforms = transforms
         self.rectified = rectified
-
+        self.remove_dontcare = remove_dontcare
         self.image_path = os.path.join(root, self.split, "image_2")
         self.lidar_path = os.path.join(root, self.split, "velodyne")
         self.label_path = os.path.join(root, self.split, "label_2")
@@ -45,14 +54,6 @@ class KITTIDetection(data.Dataset):
                 if re.match("^[0-9]{6}.bin$", x)
             ]
         )
-
-    @staticmethod
-    def lidar_to_rect(lidar, calib):
-        n = lidar.shape[0]
-        xyzw = np.c_[lidar[:, 0:3], np.ones(n)]
-        xyz = np.dot(xyzw, np.dot(calib["velo_to_cam"].T, calib["R0"].T))
-        intensity = lidar[:, 3]
-        return np.c_[xyz, intensity]
 
     def _check_integrity(self):
         return (
@@ -70,13 +71,9 @@ class KITTIDetection(data.Dataset):
         image = self._get_image(frameid)
         lidar = self._get_lidar(frameid)
         calib = self._get_calib(frameid)
-        target = None
-        if self.split == "training":
-            target = self._get_label(frameid)
-
+        target = self._get_label(frameid) if self.split == "training" else None
         if self.rectified:
-            lidar = self.lidar_to_rect(lidar, calib)
-
+            lidar = self.rectify_lidar(lidar, calib)
         inputs = {"image": image, "lidar": lidar, "calib": calib}
         if self.transforms is not None:
             inputs, target = self.transforms(inputs, target)
@@ -97,14 +94,94 @@ class KITTIDetection(data.Dataset):
     def _get_calib(self, frameid):
         basename = "{:06d}.txt".format(frameid)
         filename = os.path.join(self.calib_path, basename)
-        return self.parse_kitti_calib(filename)
+        calib = self.read_calib(filename)
+        return calib
 
     def _get_label(self, frameid):
         basename = "{:06d}.txt".format(frameid)
         filename = os.path.join(self.label_path, basename)
-        return self.parse_kitti_label(filename)
+        annotations = self.read_label_annotations(filename, self.remove_dontcare)
+        annotations = self.add_difficulty_to_annotations(annotations)
+        return annotations
 
-    def parse_kitti_calib(self, filename):
+    @staticmethod
+    def rectify_lidar(lidar, calib):
+        n = lidar.shape[0]
+        velo_to_rect = np.dot(calib["velo_to_cam"].T, calib["R0"].T)
+        xyzw = np.c_[lidar[:, 0:3], np.ones(n)]
+        xyz = np.dot(xyzw, velo_to_rect)
+        intensity = lidar[:, 3]
+        return np.c_[xyz, intensity]
+
+    @staticmethod
+    def add_difficulty_to_annotations(annotations):
+        min_height = [40, 25, 25]
+        max_occlusion = [0, 1, 2]
+        max_truncation = [0.15, 0.3, 0.5]
+        bbox = annotations["bbox"]
+        height = bbox[:, 3] - bbox[:, 1]
+        occlusion = annotations["occluded"]
+        truncation = annotations["truncated"]
+
+        num_annotations = len(annotations["class"])
+        is_easy = np.ones((num_annotations,), dtype=np.bool)
+        is_moderate = np.ones((num_annotations,), dtype=np.bool)
+        is_hard = np.ones((num_annotations,), dtype=np.bool)
+        for i, (h, o, t) in enumerate(zip(height, occlusion, truncation)):
+            if o > max_occlusion[0] or h <= min_height[0] or t > max_truncation[0]:
+                is_easy[i] = False
+            if o > max_occlusion[1] or h <= min_height[1] or t > max_truncation[1]:
+                is_moderate[i] = False
+            if o > max_occlusion[2] or h <= min_height[2] or t > max_truncation[2]:
+                is_hard[i] = False
+        is_hard = np.logical_xor(is_hard, is_moderate)
+        is_moderate = np.logical_xor(is_moderate, is_easy)
+
+        difficulty = []
+        for i in range(num_annotations):
+            if is_easy[i]:
+                difficulty.append(0)
+            elif is_moderate[i]:
+                difficulty.append(1)
+            elif is_hard[i]:
+                difficulty.append(2)
+            else:
+                difficulty.append(-1)
+        annotations["difficulty"] = np.array(difficulty, dtype=np.int32)
+        return annotations
+
+    @staticmethod
+    def read_label_annotations(filename, remove_dontcare=True):
+        annotations = {
+            "class": [],
+            "truncated": [],
+            "occluded": [],
+            "alpha": [],
+            "bbox": [],
+            "size": [],
+            "center": [],
+            "yaw": [],
+        }
+        with open(filename, "r") as fp:
+            lines = [line.strip().split(" ") for line in fp.readlines()]
+        if remove_dontcare:
+            lines = [line for line in lines if line[0] != "DontCare"]
+        annotations["class"] = np.array([x[0] for x in lines])
+        annotations["truncated"] = np.array([float(x[1]) for x in lines])
+        annotations["occluded"] = np.array([int(x[2]) for x in lines])
+        annotations["alpha"] = np.array([float(x[3]) for x in lines])
+        annotations["bbox"] = np.array([[float(v) for v in x[4:8]] for x in lines])
+        annotations["size"] = np.array([[float(v) for v in x[8:11]] for x in lines])
+        annotations["center"] = np.array([[float(v) for v in x[11:14]] for x in lines])
+        annotations["yaw"] = np.array([float(x[14]) for x in lines])
+        annotations["bbox"] = annotations["bbox"].reshape(-1, 4)
+        annotations["size"] = annotations["size"].reshape(-1, 3)
+        annotations["center"] = annotations["center"].reshape(-1, 3)
+        annotations["yaw"] = annotations["yaw"].reshape(-1)
+        return annotations
+
+    @staticmethod
+    def read_calib(filename):
         calib = {}
         with open(filename, "r") as fp:
             lines = [line.strip().split(" ") for line in fp.readlines()]
@@ -124,29 +201,6 @@ class KITTIDetection(data.Dataset):
         calib["imu_to_velo"] = calib["imu_to_velo"].reshape(3, 4)
         return calib
 
-    def parse_kitti_label(self, filename):
-        annotations = {
-            "class": [],
-            "truncated": [],
-            "occluded": [],
-            "alpha": [],
-            "bbox": [],
-            "size": [],
-            "center": [],
-            "yaw": [],
-        }
-        with open(filename, "r") as fp:
-            lines = [line.strip().split(" ") for line in fp.readlines()]
-        annotations["class"] = np.array([x[0] for x in lines])
-        annotations["truncated"] = np.array([float(x[1]) for x in lines])
-        annotations["occluded"] = np.array([int(x[2]) for x in lines])
-        annotations["alpha"] = np.array([float(x[3]) for x in lines])
-        annotations["bbox"] = np.array([[float(v) for v in x[4:8]] for x in lines])
-        annotations["size"] = np.array([[float(v) for v in x[8:11]] for x in lines])
-        annotations["center"] = np.array([[float(v) for v in x[11:14]] for x in lines])
-        annotations["yaw"] = np.array([float(x[14]) for x in lines])
-        annotations["bbox"] = annotations["bbox"].reshape(-1, 4)
-        annotations["size"] = annotations["size"].reshape(-1, 3)
-        annotations["center"] = annotations["center"].reshape(-1, 3)
-        annotations["yaw"] = annotations["yaw"].reshape(-1)
-        return annotations
+    @staticmethod
+    def collate_fn(batch):
+        return [list(x) for x in zip(*batch)]

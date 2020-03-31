@@ -1,16 +1,27 @@
+import numpy as np
 import pyvista as pv
+import torch.utils.data as data
+import torch3d.datasets as datasets
 
 
 if __name__ == "__main__":
-    dataset = KITTIDetection("data/KITTI", rectified=True)
+    dataset = datasets.KITTIDetection("/Volumes/SS1TBN/data/KITTI")
+    print(len(dataset))
 
-    pv.set_plot_theme("night")
+    dataloader = data.DataLoader(
+        dataset, batch_size=2, collate_fn=datasets.KITTIDetection.collate_fn
+    )
+    print(len(dataloader))
+    for inputs, target in dataloader:
+        print(target)
+
+    pv.set_plot_theme("ParaView")
     for inputs, target in dataset:
         lidar = inputs["lidar"]
         plt = pv.Plotter()
         mesh = pv.PolyData(lidar[:, 0:3])
         mesh["intensity"] = lidar[:, 3]
-        plt.add_mesh(mesh, render_points_as_spheres=True, cmap="viridis")
+        plt.add_mesh(mesh, render_points_as_spheres=True)
         plt.add_axes_at_origin()
 
         def roty(angle):
@@ -19,9 +30,6 @@ if __name__ == "__main__":
             return np.array([[c, 0, s], [0, 1, 0], [-s, 0, c]])
 
         for i in range(len(target["class"])):
-            if target["class"][i] == "DontCare":
-                continue
-
             print(target["class"][i])
             R = roty(target["yaw"][i])
             h, w, l = target["size"][i, 0:3]
@@ -40,5 +48,3 @@ if __name__ == "__main__":
         plt.enable_eye_dome_lighting()
         plt.show()
         plt.close()
-
-        break
