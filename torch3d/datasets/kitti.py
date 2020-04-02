@@ -32,17 +32,18 @@ class KITTIDetection(data.Dataset):
     ):
         super(KITTIDetection, self).__init__()
         self.root = root
+        self.split = split
         if split in ["train", "val"]:
-            self.split = "training"
+            self.splitdir = "training"
         else:
-            self.split = "testing"
+            self.splitdir = "testing"
         self.transforms = transforms
         self.rectified = rectified
         self.remove_dontcare = remove_dontcare
-        self.image_path = os.path.join(root, self.split, "image_2")
-        self.lidar_path = os.path.join(root, self.split, "velodyne")
-        self.label_path = os.path.join(root, self.split, "label_2")
-        self.calib_path = os.path.join(root, self.split, "calib")
+        self.image_path = os.path.join(root, self.splitdir, "image_2")
+        self.lidar_path = os.path.join(root, self.splitdir, "velodyne")
+        self.label_path = os.path.join(root, self.splitdir, "label_2")
+        self.calib_path = os.path.join(root, self.splitdir, "calib")
 
         if not self._check_integrity():
             raise RuntimeError("Dataset not found or corrupted.")
@@ -70,11 +71,14 @@ class KITTIDetection(data.Dataset):
         frameid = self.framelist[i]
         image = self._get_image(frameid)
         lidar = self._get_lidar(frameid)
-        calib = self._get_calib(frameid)
-        target = self._get_label(frameid) if self.split == "training" else None
         if self.rectified:
+            calib = self._get_calib(frameid)
             lidar = self.rectify_lidar(lidar, calib)
-        inputs = {"image": image, "lidar": lidar, "calib": calib}
+
+        inputs = {"image": image, "points": lidar}
+        target = None
+        if self.split != "test":
+            target = self._get_label(frameid)
         if self.transforms is not None:
             inputs, target = self.transforms(inputs, target)
         return inputs, target
@@ -83,6 +87,7 @@ class KITTIDetection(data.Dataset):
         basename = "{:06d}.png".format(frameid)
         filename = os.path.join(self.image_path, basename)
         image = Image.open(filename)
+        image = np.asarray(image, dtype=np.float32)
         return image
 
     def _get_lidar(self, frameid):

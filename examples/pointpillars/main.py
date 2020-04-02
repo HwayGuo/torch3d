@@ -12,8 +12,8 @@ if __name__ == "__main__":
         dataset, batch_size=2, collate_fn=datasets.KITTIDetection.collate_fn
     )
     print(len(dataloader))
-    for inputs, target in dataloader:
-        print(target)
+    for batch in dataloader:
+        print(batch)
 
     pv.set_plot_theme("ParaView")
     for inputs, target in dataset:
