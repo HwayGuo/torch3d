@@ -4,28 +4,28 @@
 
 template <typename T>
 void farthest_point_sample_impl(
-    const T* p,
-    int B,
-    int N,
-    int M,
-    int C,
+    const T* points,
+    int batch_size,
+    int num_points,
+    int num_samples,
+    int in_channels,
     T* sqdist,
-    int64_t* index)
+    int64_t* indices)
 {
-    for (int64_t b = 0; b < B; ++b) {
+    for (int64_t b = 0; b < batch_size; ++b) {
         int64_t i = 0;
 
-        for (int64_t m = 1; m < M; ++m) {
+        for (int64_t m = 1; m < num_samples; ++m) {
             T maxval = 0;
             int64_t argmax = 0;
-            T x = p[0 * N + i];
-            T y = p[1 * N + i];
-            T z = p[2 * N + i];
+            T x = points[0 * num_points + i];
+            T y = points[1 * num_points + i];
+            T z = points[2 * num_points + i];
 
-            for (int ii = 0; ii < N; ++ii) {
-                T xx = p[0 * N + ii] - x;
-                T yy = p[1 * N + ii] - y;
-                T zz = p[2 * N + ii] - z;
+            for (int ii = 0; ii < num_points; ++ii) {
+                T xx = points[0 * num_points + ii] - x;
+                T yy = points[1 * num_points + ii] - y;
+                T zz = points[2 * num_points + ii] - z;
                 T d2 = xx * xx + yy * yy + zz * zz;
                 sqdist[ii] = fmin(d2, sqdist[ii]);
 
@@ -36,34 +36,35 @@ void farthest_point_sample_impl(
             }
 
             i = argmax;
-            index[m] = argmax;
+            indices[m] = argmax;
         }
 
-        p += C * N;
-        sqdist += N;
-        index += M;
+        points += in_channels * num_points;
+        sqdist += num_points;
+        indices += num_samples;
     }
 }
 
 
-at::Tensor farthest_point_sample_cpu(const at::Tensor& p, int M)
+at::Tensor farthest_point_sample_cpu(const at::Tensor& points, int num_samples)
 {
-    int B = p.size(0);
-    int N = p.size(2);
-    int C = p.size(1);
-    at::Tensor index = at::zeros({B, M}, p.options().dtype(at::kLong));
-    at::Tensor sqdist = at::zeros({B, N}, p.options()).fill_(1e10);
+    int batch_size = points.size(0);
+    int in_channels = points.size(1);
+    int num_points = points.size(2);
+    at::Tensor indices =
+        at::zeros({batch_size, num_samples}, points.options().dtype(at::kLong));
+    at::Tensor sqdist = at::zeros({batch_size, num_points}, points.options()).fill_(1e10);
 
-    AT_DISPATCH_FLOATING_TYPES(p.scalar_type(), "farthest_point_sample_cpu", [&] {
+    AT_DISPATCH_FLOATING_TYPES(points.scalar_type(), "farthest_point_sample_cpu", [&] {
         farthest_point_sample_impl<scalar_t>(
-            p.data_ptr<scalar_t>(),
-            B,
-            N,
-            M,
-            C,
+            points.data_ptr<scalar_t>(),
+            batch_size,
+            num_points,
+            num_samples,
+            in_channels,
             sqdist.data_ptr<scalar_t>(),
-            index.data_ptr<int64_t>());
+            indices.data_ptr<int64_t>());
     });
 
-    return index;
+    return indices;
 }
