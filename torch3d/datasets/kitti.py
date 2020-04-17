@@ -12,7 +12,7 @@ class KITTIDetection(data.Dataset):
     Args:
       root (string): Root directory of the KITTI dataset.
       split (string, optional): The dataset subset which can be either
-        "train", "val", or "test". Default: ``"train"``.
+        ``"train"``, ``"val"``, or ``"test"``. Default: ``"train"``.
       transforms (callable, optional): A function/transform that takes
         input sample and its target as entry and return a transformed
         version. Default: ``None``.

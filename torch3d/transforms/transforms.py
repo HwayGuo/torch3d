@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-import torch3d.transforms.functional as F
+from . import functional as F
 
 
 class Compose(object):
