@@ -1,96 +1,91 @@
 import torch
 import numpy as np
-from torch3d.transforms import functional as F
+import torch3d.transforms.functional as F
 
 
 class Compose(object):
-    """
-    Composes several transforms together.
+    """Compose several transforms together.
 
     Args:
-        transforms (list of ``Transform``): list of transforms to compose.
+      transforms (list[callable]): List of transforms to compose.
 
     Example:
-        >>> transforms.Compose([
-        >>>     transforms.Shuffle(),
-        >>>     transforms.ToTensor(),
-        >>> ])
+      >>> transforms.Compose([
+      >>>     transforms.Shuffle(),
+      >>>     transforms.ToTensor(),
+      >>> ])
     """
 
     def __init__(self, transforms):
         self.transforms = transforms
 
-    def __call__(self, pcd):
+    def __call__(self, points):
         for t in self.transforms:
-            pcd = t(pcd)
-        return pcd
+            points = t(points)
+        return points
 
 
 class ToTensor(object):
-    """
-    Convert a ``numpy.ndarray`` to tensor.
+    """Convert a numpy.ndarray to tensor."""
 
-    Converts a numpy.ndarray (N x C) to a torch.FloatTensor of shape (C x N).
-    """
-
-    def __call__(self, pcd):
+    def __call__(self, points):
         """
         Args:
-            pcd (numpy.ndarray): Point cloud to be converted to tensor.
+          points (numpy.ndarray): Point cloud to be converted to tensor.
 
         Returns:
-            Tensor: Converted point cloud.
+          torch.Tensor: Converted point cloud.
         """
-        return F.to_tensor(pcd)
+        return F.to_tensor(points)
 
     def __repr__(self):
         return self.__class__.__name__ + "()"
 
 
 class Shuffle(object):
-    """
-    Randomly shuffle the given point cloud.
-
-    Shuffles a numpy.ndarray (N x C) by random permutation.
-    """
+    """Randomly shuffle the given point cloud."""
 
     @staticmethod
-    def get_params(pcd):
-        """
-        Get a random order for a shuffle.
+    def get_params(points):
+        """Get a random order for a shuffle.
 
         Args:
-            pcd (numpy.ndarray): Point cloud to be shuffled.
+          points (numpy.ndarray): Point cloud to be shuffled.
 
         Returns:
-            numpy.ndarray: A random permuted sequence.
+          numpy.ndarray: A random permuted sequence.
         """
-
-        n = len(pcd)
+        n = len(points)
         assert n > 0
         return np.random.permutation(n)
 
-    def __call__(self, pcd):
-        perm = self.get_params(pcd)
-        return pcd[perm]
+    def __call__(self, points):
+        perm = self.get_params(points)
+        return points[perm]
 
 
 class RandomPointSample(object):
+    """Randomly sample the given point cloud.
+
+    Args:
+      num_samples (int): Number of samples to select from point cloud.
+    """
+
     def __init__(self, num_samples):
         self.num_samples = num_samples
 
     @staticmethod
-    def get_params(pcd, num_samples):
-        n = len(pcd)
+    def get_params(points, num_samples):
+        n = len(points)
         assert n > 0
         if n >= num_samples:
-            index = np.random.choice(n, num_samples, replace=False)
+            samples = np.random.choice(n, num_samples, replace=False)
         else:
             m = num_samples - n
-            index = np.random.choice(n, m, replace=True)
-            index = list(range(n)) + list(index)
-        return index
+            samples = np.random.choice(n, m, replace=True)
+            samples = list(range(n)) + list(samples)
+        return samples
 
-    def __call__(self, pcd):
-        index = self.get_params(pcd, self.num_samples)
-        return pcd[index]
+    def __call__(self, points):
+        samples = self.get_params(points, self.num_samples)
+        return points[samples]

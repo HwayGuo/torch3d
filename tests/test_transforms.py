@@ -4,7 +4,7 @@ import torch3d.transforms as T
 
 
 def test_to_tensor():
-    size = torch.Size([3, 2048])
+    size = torch.Size([2048, 3])
     x = np.random.rand(2048, 3)
     x = T.ToTensor()(x)
     assert x.is_contiguous()
@@ -19,7 +19,7 @@ def test_random_point_sample():
 
 
 def test_compose():
-    size = torch.Size([3, 1024])
+    size = torch.Size([1024, 3])
     x = np.random.rand(2048, 3)
     t = T.Compose([T.Shuffle(), T.RandomPointSample(1024), T.ToTensor()])
     x = t(x)

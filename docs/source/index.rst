@@ -12,5 +12,4 @@ Torch3d documentation
    :caption: Python API
 
    modules/datasets
-   modules/models
-   modules/nn
+   modules/transforms

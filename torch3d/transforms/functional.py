@@ -10,20 +10,20 @@ def _is_tensor(tensor):
     return isinstance(tensor, torch.Tensor)
 
 
-def _is_numpy_point_cloud(pcd):
-    return pcd.ndim == 2
+def _is_numpy_point_cloud(points):
+    return points.ndim == 2
 
 
 def to_tensor(points):
-    """Convert a ``np.ndarray`` point cloud to tensor.
+    """Convert a point cloud to tensor.
 
     See ``ToTensor`` for more details.
 
     Args:
-      points (np.ndarray): Point cloud to be converted to tensor.
+      points (numpy.ndarray): Point cloud to be converted to tensor.
 
     Returns:
-      Tensor: Converted point cloud.
+      torch.Tensor: Converted point cloud.
     """
 
     if not _is_numpy(points):
@@ -31,18 +31,13 @@ def to_tensor(points):
             "Point cloud should be an ndarray. Got {}.".format(type(points))
         )
 
-    if _is_numpy(pcd) and not _is_numpy_point_cloud(pcd):
+    if _is_numpy(points) and not _is_numpy_point_cloud(points):
         raise ValueError(
-            "Point cloud should be 2 dimensional. Got {} dimensions.".format(pcd.ndim)
+            "Point cloud should be 2 dimensional. Got {} dimensions.".format(
+                points.ndim
+            )
         )
 
     if _is_numpy(points):
-        points = torch.as_tensor(points.T).contiguous()
+        points = torch.as_tensor(points).contiguous()
         return points
-
-
-def to_numpy(tensor):
-    """
-    Converts a `Tensor` to a `numpy.ndarray` point cloud.
-    """
-    pass
